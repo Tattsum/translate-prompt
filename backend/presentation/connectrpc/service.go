@@ -9,6 +9,7 @@ import (
 
 	appintake "github.com/Tattsum/translate-prompt/backend/application/intake"
 	"github.com/Tattsum/translate-prompt/backend/application/optimize"
+	domainintake "github.com/Tattsum/translate-prompt/backend/domain/intake"
 	translatepromptv1 "github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1"
 	"github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1/translate_promptv1connect"
 	"github.com/Tattsum/translate-prompt/backend/presentation/mapper"
@@ -16,13 +17,18 @@ import (
 
 // Service implements TranslatePromptService via Connect-RPC.
 type Service struct {
-	optimize *optimize.UseCase
-	intake   *appintake.UseCase
+	optimize           *optimize.UseCase
+	intake             *appintake.UseCase
+	investigateEnabled bool
 }
 
 // NewService wires use cases into the Connect handler.
-func NewService(opt *optimize.UseCase, intake *appintake.UseCase) *Service {
-	return &Service{optimize: opt, intake: intake}
+func NewService(opt *optimize.UseCase, intake *appintake.UseCase, investigateEnabled bool) *Service {
+	return &Service{
+		optimize:           opt,
+		intake:             intake,
+		investigateEnabled: investigateEnabled,
+	}
 }
 
 // Mount registers the Connect service on mux at the standard path prefix.
@@ -54,6 +60,9 @@ func (s *Service) Investigate(
 	ctx context.Context,
 	req *connect.Request[translatepromptv1.InvestigateRequest],
 ) (*connect.Response[translatepromptv1.InvestigateResponse], error) {
+	if !s.investigateEnabled {
+		return nil, connect.NewError(connect.CodePermissionDenied, domainintake.ErrInvestigateDisabled)
+	}
 	profile := mapper.ProfileFromString(req.Msg.TargetProfile)
 	result, err := s.intake.Investigate(ctx, req.Msg.WorkspacePath, profile)
 	if err != nil {

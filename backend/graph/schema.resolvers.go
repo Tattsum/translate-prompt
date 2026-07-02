@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	domainintake "github.com/Tattsum/translate-prompt/backend/domain/intake"
 	"github.com/Tattsum/translate-prompt/backend/graph/model"
 	"github.com/Tattsum/translate-prompt/backend/presentation/mapper"
 )
@@ -20,6 +21,9 @@ func (r *mutationResolver) Analyze(ctx context.Context, input model.AnalyzeInput
 
 // Investigate is the resolver for the investigate field.
 func (r *mutationResolver) Investigate(ctx context.Context, input model.InvestigateInput) (*model.InvestigationResult, error) {
+	if !r.InvestigateEnabled {
+		return nil, domainintake.ErrInvestigateDisabled
+	}
 	profile := mapper.ProfileFromGraphQL(input.TargetProfile)
 	result, err := r.IntakeUC.Investigate(ctx, input.WorkspacePath, profile)
 	if err != nil {
