@@ -7,16 +7,19 @@ import { SettingsPage } from './pages/Settings'
 import { IntakePage } from './pages/Intake'
 import { ResultPage } from './pages/Result'
 import { AppProvider } from './context/AppContext'
+import { AppLayout } from './components/Layout'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<InputPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/intake" element={<IntakePage />} />
-          <Route path="/result" element={<ResultPage />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<InputPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/intake" element={<IntakePage />} />
+            <Route path="/result" element={<ResultPage />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
