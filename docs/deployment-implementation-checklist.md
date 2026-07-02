@@ -1,95 +1,119 @@
 # デプロイ実装チェックリスト
 
-[deployment.md](./deployment.md) の実装進捗管理用。別セッションで `[x]` に更新する。
+[deployment.md](./deployment.md) の実装進捗管理用。  
+**現状の詳細は [deployment-session-handoff.md](./deployment-session-handoff.md) を参照。**
 
 ## 前提
 
-- 合意済み: 招待制 β / Fly.io / Pages / Workers / Tunnel / Access
-- ドメイン: `translate.tattsum.com`, `prompt-api.tattsum.com`
-- DNS: `tattsum.com` は Cloudflare 管理済み
+- 合意済み: 招待制 β / Fly.io / Pages / Workers / Access
+- 目標ドメイン: `translate.tattsum.com`（SPA）, `prompt-api.tattsum.com`（API）
+- DNS: `tattsum.com` は Cloudflare 管理済み（アカウント: Kurohari35@gmail.com's Account）
+- PR #1 MERGED（WP-1〜4 コード + CI）
+- SPA 公開: Pages カスタムドメイン banned → **Workers プロキシ**（方式 A）
 
 ---
 
 ## WP-1: バックエンド本番対応
 
-- [ ] `LISTEN_HOST` 環境変数（default `127.0.0.1`）
-- [ ] `ALLOWED_ORIGINS` 環境変数（CORS 制限）
-- [ ] `INVESTIGATE_ENABLED` 環境変数 + GraphQL/Connect ガード
-- [ ] `Makefile` に `build-server-api`（embed なし）追加
-- [ ] `Dockerfile` 作成
-- [ ] `fly.toml` 作成
-- [ ] Investigate 無効化のテスト追加
-- [ ] `make serve` / `make test` がローカルで通る
+- [x] `LISTEN_HOST` 環境変数（default `127.0.0.1`）
+- [x] `ALLOWED_ORIGINS` 環境変数（CORS 制限）
+- [x] `INVESTIGATE_ENABLED` 環境変数 + GraphQL/Connect ガード
+- [x] `Makefile` に `build-server-api`（embed なし）追加
+- [x] `Dockerfile` 作成
+- [x] `fly.toml` 作成
+- [x] Investigate 無効化のテスト追加
+- [x] `make serve` / `make test` がローカルで通る
 
 ## WP-2: フロントエンド本番対応
 
-- [ ] `VITE_API_BASE_URL` 対応（`client.ts`）
-- [ ] `VITE_ENABLE_WORKSPACE_PATH` で Workspace Path 非表示
-- [ ] `frontend/.env.production` または Pages 環境変数ドキュメント化
-- [ ] Vitest 更新
-- [ ] `make dev` がローカルで通る
+- [x] `VITE_API_BASE_URL` 対応（`client.ts`）
+- [x] `VITE_ENABLE_WORKSPACE_PATH` で Workspace Path 非表示
+- [x] `frontend/.env.production` 作成
+- [x] Vitest 更新
+- [x] `make dev` がローカルで通る
 
-## WP-3: Workers プロキシ
+## WP-3: Workers プロキシ（API）
 
-- [ ] `wrangler.toml` 作成
-- [ ] `workers/src/index.ts` 実装
-- [ ] `/query` 転送
-- [ ] `/translate_prompt.v1.TranslatePromptService/*` 転送
-- [ ] CORS 整合確認
-- [ ] `wrangler dev` でローカル検証
+- [x] `wrangler.toml` 作成
+- [x] `workers/src/index.ts` 実装
+- [x] `/query` 転送
+- [x] `/translate_prompt.v1.TranslatePromptService/*` 転送
+- [x] CORS 整合確認（Go 側委譲）
+- [ ] `wrangler dev` でローカル検証（任意）
+
+## WP-3b: Workers プロキシ（SPA）
+
+- [x] `wrangler.web.toml` 作成
+- [x] `workers/src/web.ts` 実装（Pages リバースプロキシ）
+- [x] CI `deploy-workers` に SPA Worker デプロイ追加
 
 ## WP-4: CI/CD
 
-- [ ] `.github/workflows/deploy.yml` 作成
-- [ ] test ジョブ（`make test`, `make lint`）
-- [ ] Fly デプロイジョブ
-- [ ] Workers デプロイジョブ
-- [ ] Pages デプロイ（Git 連携 or wrangler pages）
+- [x] `.github/workflows/deploy.yml` 作成
+- [x] test ジョブ（`make test`, `make lint`）
+- [x] Fly デプロイジョブ（`ALLOWED_ORIGINS` secrets 同期付き）
+- [x] Workers デプロイジョブ（API + SPA）
+- [x] Pages デプロイ（wrangler pages）
+- [x] GitHub Secrets 設定（`FLY_API_TOKEN`, `CLOUDFLARE_*`）
 
 ## WP-5: インフラ手動セットアップ
 
-- [ ] Fly アプリ作成・初回デプロイ
-- [ ] Cloudflare Tunnel 作成・Fly に cloudflared 配置
-- [ ] Workers `ORIGIN_URL` シークレット設定
-- [ ] Pages プロジェクト作成・Git 連携
-- [ ] DNS: `prompt` CNAME → Pages
-- [ ] DNS: `prompt-api` → Workers
-- [ ] Access: `translate.tattsum.com` アプリ + ポリシー
+- [x] Fly アプリ作成・デプロイ（`translate-prompt-api`）
+- [ ] ~~Cloudflare Tunnel 作成~~（見送り。Fly パブリック URL 直結）
+- [x] Workers `ORIGIN_URL` シークレット設定（`https://translate-prompt-api.fly.dev`）
+- [x] Pages プロジェクト作成（`translate-prompt`）
+- [x] DNS: `prompt-api` → Workers（動作確認済み）
+- [ ] DNS: `translate` → A `192.0.2.1` + Worker Route（[手順](./deployment-dns-setup.md)）
+- [ ] Workers: SPA プロキシ CI デプロイ後に `translate-prompt-web` 確認
+- [ ] Access: SPA URL アプリ + ポリシー（[手順](./deployment-access-setup.md)）
 - [ ] Access: `prompt-api.tattsum.com` アプリ + ポリシー
-- [ ] GitHub Secrets 設定（`FLY_API_TOKEN`, `CLOUDFLARE_*`）
+
+### ドメイン問題（記録）
+
+- [x] `prompt.tattsum.com` Pages カスタムドメイン → **banned**（Workers 方式に切替）
+- [x] `translate.tattsum.com` Pages カスタムドメイン → **banned**（Workers 方式に切替）
+- [x] `api.prompt.tattsum.com` → TLS 失敗。`prompt-api.tattsum.com` に変更済み
+- [ ] `translate.tattsum.com` CNAME のみ → **522**（A + Worker に切替予定）
 
 ## WP-6: スモークテスト
 
+- [x] 自動スクリプト `scripts/deployment-smoke-test.sh`
+- [x] Health（`prompt-api.tattsum.com` 経由）成功
+- [x] Pages（`translate-prompt.pages.dev`）200
+- [ ] SPA Worker 経由 `translate.tattsum.com` 200（DNS 反映後）
 - [ ] Access ログイン → SPA 表示
-- [ ] Health / Estimate / Analyze / Optimize 成功
+- [ ] Estimate / Analyze / Optimize 成功
 - [ ] Investigate Web 無効確認
 - [ ] CLI Investigate ローカル動作確認
 - [ ] Playground 本番無効確認
+- [ ] CORS（許可オリジンのみ）確認
 
 ## WP-7: ドキュメント更新
 
+- [x] `docs/deployment-session-handoff.md` 作成（セッション引き継ぎ）
+- [x] `docs/deployment.md` を実態に合わせて更新（Tunnel 見送り、Workers SPA、blog パターン）
+- [x] `docs/deployment-access-setup.md` 作成
+- [x] `docs/deployment-dns-setup.md` 作成
 - [ ] `docs/architecture.md` に本番構成追記
 - [ ] `README.md` にデプロイ概要リンク
-- [ ] 本チェックリストを完了状態に更新
+- [x] 本チェックリストを進行状態に更新
 
 ---
 
 ## サブエージェント起動例
 
-各 WP は独立して依頼可能。実装セッションの最初に以下を添付する:
-
 ```
-@docs/deployment.md と docs/deployment-implementation-checklist.md を読み、
-WP-N を実装してください。合意内容は deployment.md の「合意サマリ」が正です。
-ローカル開発（make serve / make dev）は壊さないこと。
+@docs/deployment-session-handoff.md を最優先で読み、
+DNS / Access の手動設定とスモークテストを完了してください。
 ```
 
-| WP | 推奨 subagent_type | 並列可否 |
-|----|-------------------|---------|
-| WP-1 | generalPurpose | WP-2 と並列可 |
-| WP-2 | generalPurpose | WP-1 と並列可 |
-| WP-3 | generalPurpose | WP-1 完了後 |
-| WP-4 | generalPurpose | WP-1〜3 のファイル構成確定後 |
-| WP-5 | shell + 手動 | WP-1〜4 完了後 |
-| WP-6 | generalPurpose | WP-5 完了後 |
-| WP-7 | generalPurpose | 最後 |
+| WP | 状態 | 備考 |
+|----|------|------|
+| WP-1 | 完了 | |
+| WP-2 | 完了 | |
+| WP-3 | 完了（API） | |
+| WP-3b | 完了（コード） | CI デプロイ + DNS 手動 |
+| WP-4 | 完了 | |
+| WP-5 | **進行中** | DNS + Access 手動 |
+| WP-6 | 一部完了 | DNS/Access 後に E2E |
+| WP-7 | ほぼ完了 | architecture.md 残 |

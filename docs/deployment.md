@@ -13,7 +13,7 @@
 | オリジン | **Fly.io**（Go モノリス維持） |
 | フロント | **Cloudflare Pages**（SPA 分離） |
 | エッジ API | **Cloudflare Workers**（薄いプロキシ） |
-| オリジン到達 | **Cloudflare Tunnel**（`cloudflared`、パブリック IP 非公開） |
+| オリジン到達 | **Fly.io パブリック URL 直結**（個人 β。Tunnel は Phase 2 候補） |
 | 認証 | **Cloudflare Access**（ユーザ DB なし） |
 | DB | **当面なし**（ステートレス） |
 | CI/CD | **GitHub Actions**（Fly + Pages + Workers 自動デプロイ） |
@@ -37,10 +37,11 @@
     │ HTTPS
     ▼
 [Cloudflare Access]  ← Google / GitHub ログイン（招待制）
-    ├─ translate.tattsum.com ────── Cloudflare Pages（React SPA）
-    └─ prompt-api.tattsum.com ── Cloudflare Workers（API プロキシ）
+    ├─ translate.tattsum.com ── Worker「translate-prompt-web」（Pages プロキシ）
+    │       └─ translate-prompt.pages.dev（静的 SPA、CI デプロイ）
+    └─ prompt-api.tattsum.com ── Worker「translate-prompt-api-proxy」
             │
-            │ Cloudflare Tunnel（cloudflared、Fly 内で常駐）
+            │ HTTPS（Fly パブリック URL）
             ▼
         Fly.io（Go monolith）
             ├─ POST /query              （GraphQL: analyze, estimate）
@@ -48,13 +49,16 @@
             └─ SPA 配信はしない（Pages に分離）
 ```
 
+> **実装メモ（2026-07）**: 当初設計の Tunnel は見送り。`ORIGIN_URL` は `https://translate-prompt-api.fly.dev`。  
+> Pages カスタムドメインは `*.tattsum.com` で banned のため、SPA 公開は **Workers プロキシ**（blog と同型）を採用。詳細は [deployment-session-handoff.md](./deployment-session-handoff.md)。
+
 ### 責務分離
 
 | レイヤ | 責務 | 置かないもの |
 |--------|------|-------------|
-| Pages | 静的 SPA 配信 | API ロジック |
-| Workers | リバースプロキシ、CORS、（任意）レート制限 | ドメインコア |
-| Tunnel | オリジン非公開化 | — |
+| Pages | 静的 SPA ビルド・`*.pages.dev` 配信 | カスタムドメイン（banned）、API ロジック |
+| Workers（web） | `translate.tattsum.com` → Pages プロキシ | ドメインコア |
+| Workers（api） | API リバースプロキシ | ドメインコア |
 | Fly.io | Go DDD コア（最適化パイプライン） | ユーザ認証 DB |
 | Access | β 招待制の前段認証 | アプリ内セッション |
 
@@ -85,14 +89,16 @@
 
 ## DNS 設計（tattsum.com）
 
-Cloudflare ダッシュボードで以下を設定する（実装セッションの最終手順）。
+Cloudflare ダッシュボードで設定。**Pages カスタムドメイン UI は使わない**（banned）。
 
-| レコード | タイプ | 向き先 |
-|---------|--------|--------|
-| `translate` | CNAME | Cloudflare Pages プロジェクトの `*.pages.dev` |
-| `prompt-api` | CNAME / Worker | Workers カスタムドメイン（自動設定） |
+| レコード | タイプ | 向き先 | プロキシ |
+|---------|--------|--------|---------|
+| `translate` | A | `192.0.2.1` | ON → Worker `translate-prompt-web` |
+| `prompt-api` | A | `192.0.2.1` | ON → Worker `translate-prompt-api-proxy` |
 
-**注意**: Fly のパブリック URL は DNS に載せない。Tunnel 経由のみ。
+手順詳細: [deployment-dns-setup.md](./deployment-dns-setup.md)
+
+**注意**: Fly のパブリック URL は DNS に載せない。Workers の `ORIGIN_URL` シークレットで参照する。
 
 ---
 
@@ -103,11 +109,15 @@ Cloudflare ダッシュボードで以下を設定する（実装セッション
 ```
 Dockerfile                          # Go サーバ用マルチステージビルド
 fly.toml                            # Fly.io アプリ定義
-infra/cloudflared/fly.toml          # （任意）Tunnel 用別アプリ
-wrangler.toml                       # Workers プロキシ定義
-workers/src/index.ts                # API プロキシ（Tunnel オリジンへ転送）
+wrangler.toml                       # API プロキシ Worker
+wrangler.web.toml                   # SPA プロキシ Worker（Pages へ転送）
+workers/src/index.ts                # API プロキシ
+workers/src/web.ts                  # SPA プロキシ
 .github/workflows/deploy.yml        # CI/CD
 frontend/.env.production            # VITE_API_BASE_URL（git 管理可、秘密なし）
+scripts/deployment-smoke-test.sh    # 本番スモークテスト
+docs/deployment-access-setup.md     # Access 手動設定
+docs/deployment-dns-setup.md        # DNS / Workers Route 手動設定
 ```
 
 ### 変更
@@ -177,13 +187,31 @@ primary_region = "nrt"  # 東京リージョン
   auto_start_machines = true
   min_machines_running = 1
 
-# パブリック ingress は閉じ、Tunnel のみ許可する構成を推奨
-# （Fly の services を internal のみにするか、cloudflared サイドカーで運用）
+# パブリック ingress は Fly URL 直結（個人 β）。Tunnel 導入時は services を internal のみにする構成を検討
 ```
 
-**Tunnel 構成（推奨）**: Fly アプリ内で `cloudflared` をサイドカーまたは同一マシンで起動し、Tunnel の `service` を `http://localhost:8080` に向ける。Fly のパブリック HTTP を無効化する。
+**現行構成（Tunnel 見送り）**: Workers `ORIGIN_URL` に `https://translate-prompt-api.fly.dev` を設定。Fly はパブリック HTTP で稼働。
 
-### 2. Cloudflare Workers（API プロキシ）
+### 2b. Cloudflare Workers（SPA プロキシ）
+
+#### wrangler.web.toml
+
+```toml
+name = "translate-prompt-web"
+main = "workers/src/web.ts"
+compatibility_date = "2025-01-01"
+
+routes = [
+  { pattern = "translate.tattsum.com/*", zone_name = "tattsum.com" }
+]
+
+[vars]
+PAGES_HOST = "translate-prompt.pages.dev"
+```
+
+`workers/src/web.ts` は全リクエストを `https://translate-prompt.pages.dev` に転送し、`Host` を Pages 向けに書き換える。Pages 側で SPA ルーティング済み。
+
+### 3. Cloudflare Workers（API プロキシ）
 
 #### wrangler.toml（方針）
 
@@ -197,8 +225,7 @@ routes = [
 ]
 
 [vars]
-# Tunnel のホスト名は Cloudflare Zero Trust で発行される URL
-# ORIGIN_URL = "https://<tunnel-id>.cfargotunnel.com"
+# ORIGIN_URL は wrangler secret put ORIGIN_URL で設定（Fly パブリック URL）
 ```
 
 #### Workers プロキシ（方針）
@@ -218,9 +245,9 @@ routes = [
 // - CORS ヘッダは Workers または Go 側のどちらか一方で付与（二重付与しない）
 ```
 
-**シークレット**: `ORIGIN_URL` は `wrangler secret put ORIGIN_URL` で設定（Tunnel URL）。
+**シークレット**: `ORIGIN_URL` は `wrangler secret put ORIGIN_URL` で設定（例: `https://translate-prompt-api.fly.dev`）。
 
-### 3. Cloudflare Pages（SPA）
+### 4. Cloudflare Pages（SPA ビルド・pages.dev 配信）
 
 #### ビルド設定
 
@@ -251,7 +278,9 @@ const graphqlClient = createUrqlClient({
 const connectTransport = createConnectTransport({ baseUrl: apiBase || '/' })
 ```
 
-### 4. Cloudflare Access
+### 5. Cloudflare Access
+
+手動設定の詳細: [deployment-access-setup.md](./deployment-access-setup.md)
 
 Zero Trust ダッシュボードで設定（手動・初回のみ）。
 
@@ -263,7 +292,7 @@ Zero Trust ダッシュボードで設定（手動・初回のみ）。
 
 Access を Workers / Pages の前段に置くため、DNS は Cloudflare プロキシ（オレンジ雲）必須。
 
-### 5. Investigate 無効化
+### 6. Investigate 無効化
 
 #### バックエンド
 
@@ -301,13 +330,12 @@ jobs:
 
   deploy-workers:
     needs: test
-    # wrangler deploy
+    # wrangler deploy（API + SPA プロキシ）
     # secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 
   deploy-pages:
     needs: test
-    # Cloudflare Pages Git 連携が別途ある場合はスキップ可
-    # または wrangler pages deploy frontend/dist
+    # wrangler pages deploy frontend/dist
 ```
 
 ### 必要な GitHub Secrets
@@ -389,16 +417,15 @@ jobs:
 
 **プロンプト例**:
 
-> `docs/deployment.md` の WP-5 に従い、Cloudflare / Fly の手動セットアップ手順を実行し、スモークテストしてください。
-> - Tunnel 作成・Fly への cloudflared 配置
-> - Access ポリシー（prompt / api 両方）
-> - DNS レコード
-> - エンドツーエンド確認
+> WP-5 に従い、DNS / Access の手動セットアップとスモークテストを実施。
+> - DNS: [deployment-dns-setup.md](./deployment-dns-setup.md)
+> - Access: [deployment-access-setup.md](./deployment-access-setup.md)
+> - `./scripts/deployment-smoke-test.sh`
 
 **完了条件**:
 
-- [ ] Access ログイン後に `translate.tattsum.com` が表示
-- [ ] Analyze → Optimize フローが動作
+- [ ] `translate.tattsum.com` が Worker 経由で SPA を返す（200 または Access 302）
+- [ ] Access ログイン後に Analyze → Optimize が動作
 - [ ] Investigate が Web から失敗する（期待通り）
 
 ---
@@ -413,45 +440,44 @@ fly auth login
 fly apps create translate-prompt-api
 fly secrets set INVESTIGATE_ENABLED=false ALLOWED_ORIGINS=https://translate.tattsum.com
 
-# デプロイ（CI 整備後は Actions から）
+# デプロイ（CI 整備後は Actions から。secrets は deploy-fly で同期）
 fly deploy
 ```
 
-### B. Cloudflare Tunnel
-
-1. Zero Trust → Networks → Tunnels → Create tunnel
-2. コネクタ名: `translate-prompt-fly`
-3. Fly マシンで `cloudflared tunnel run --token <TOKEN>`
-4. Public Hostname: なし（Workers から private network 経由で到達する構成でも可）
-5. または Internal URL を Workers の `ORIGIN_URL` に設定
-
-**簡易構成（個人 β）**: Tunnel のサービスを `http://localhost:8080` に向け、Workers の `ORIGIN_URL` に Tunnel の DNS 名（`*.cfargotunnel.com`）を設定。Fly のパブリック URL は使わない。
-
-### C. Cloudflare Workers
+### B. Cloudflare Workers（API + SPA）
 
 ```bash
 cd workers
-pnpm install  # または npm
-npx wrangler secret put ORIGIN_URL
-npx wrangler deploy
+pnpm install
+printf '%s' 'https://translate-prompt-api.fly.dev' | pnpm exec wrangler secret put ORIGIN_URL --config ../wrangler.toml
+pnpm exec wrangler deploy --config ../wrangler.toml
+pnpm exec wrangler deploy --config ../wrangler.web.toml
 ```
 
-### D. Cloudflare Pages
+### C. Cloudflare Pages
 
-1. Workers & Pages → Create → Connect to Git
-2. リポジトリ選択、ビルド設定は上表参照
-3. カスタムドメイン `translate.tattsum.com` を追加
-4. 環境変数 `VITE_API_BASE_URL`, `VITE_ENABLE_WORKSPACE_PATH` を設定
+CI の `deploy-pages` が `wrangler pages deploy` を実行。  
+**カスタムドメインは追加しない**（banned）。公開 URL は Worker 経由の `translate.tattsum.com`。
+
+### D. DNS
+
+[deployment-dns-setup.md](./deployment-dns-setup.md) を参照。
 
 ### E. Cloudflare Access
 
-1. Access → Applications → 2 アプリ追加（prompt / api）
-2. Policy: 自分のメール + 招待者
-3. Session duration: 24h 程度（β）
+[deployment-access-setup.md](./deployment-access-setup.md) を参照。
+
+### F. （任意・将来）Cloudflare Tunnel
+
+個人 β では見送り。オリジン非公開化が必要になったら導入し、`ORIGIN_URL` を Tunnel URL に切り替える。
 
 ---
 
-## スモークテストチェックリスト
+## スモークテスト
+
+```bash
+./scripts/deployment-smoke-test.sh
+```
 
 | # | 確認項目 | 期待結果 |
 |---|---------|---------|
@@ -470,7 +496,7 @@ npx wrangler deploy
 
 ## セキュリティチェックリスト
 
-- [ ] Fly オリジンは Tunnel 経由のみ（パブリック HTTP 最小化）
+- [ ] Fly オリジンは必要最小限（Tunnel 導入で非公開化を検討）
 - [ ] `INVESTIGATE_ENABLED=false`（サーバ FS 読み取り防止）
 - [ ] CORS は `translate.tattsum.com` のみ
 - [ ] Access ポリシーで招待者限定
@@ -497,3 +523,5 @@ npx wrangler deploy
 - [api.md](./api.md) — API 仕様
 - [implementation-roadmap.md](./implementation-roadmap.md) — Phase 1 アプリ実装（完了済み）
 - [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — 実装チェックリスト（進捗管理用）
+- [deployment-access-setup.md](./deployment-access-setup.md) — Cloudflare Access 手動設定
+- [deployment-dns-setup.md](./deployment-dns-setup.md) — DNS / Workers Route 手動設定
