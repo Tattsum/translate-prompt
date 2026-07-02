@@ -13,6 +13,9 @@ RUN CGO_ENABLED=0 go build -tags noembed -trimpath -ldflags="-s -w" -o /server .
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
+ENV LISTEN_HOST=0.0.0.0
+ENV ENV=production
+
 COPY --from=builder /server /server
 
 EXPOSE 8080
