@@ -102,6 +102,15 @@ jobs:
         working-directory: workers
         run: pnpm install
 
+      - name: Ensure Pages project exists
+        working-directory: workers
+        run: |
+          pnpm exec wrangler pages project list | grep -q translate-prompt || \
+          pnpm exec wrangler pages project create translate-prompt --production-branch master
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deploy Pages
         working-directory: workers
         run: pnpm exec wrangler pages deploy ../frontend/dist --project-name=translate-prompt --branch master
