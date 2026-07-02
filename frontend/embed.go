@@ -1,3 +1,5 @@
+//go:build !noembed
+
 // Package frontend embeds the built SPA assets.
 package frontend
 
