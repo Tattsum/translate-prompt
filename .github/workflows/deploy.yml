@@ -30,7 +30,7 @@ jobs:
 
   deploy-fly:
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
 
   deploy-workers:
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,16 +63,23 @@ jobs:
         working-directory: workers
         run: pnpm install
 
+      - name: Set Workers ORIGIN_URL secret
+        working-directory: workers
+        run: printf '%s' 'https://translate-prompt-api.fly.dev' | pnpm exec wrangler secret put ORIGIN_URL --config ../wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deploy Workers
         working-directory: workers
-        run: pnpm exec wrangler deploy
+        run: pnpm exec wrangler deploy --config ../wrangler.toml
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-pages:
     needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -91,9 +98,13 @@ jobs:
         working-directory: frontend
         run: pnpm install --frozen-lockfile && pnpm run build
 
+      - name: Install workers tooling
+        working-directory: workers
+        run: pnpm install
+
       - name: Deploy Pages
-        working-directory: frontend
-        run: pnpm exec wrangler pages deploy dist --project-name=translate-prompt
+        working-directory: workers
+        run: pnpm exec wrangler pages deploy ../frontend/dist --project-name=translate-prompt --branch master
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
