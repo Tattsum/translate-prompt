@@ -1,0 +1,25 @@
+app = "translate-prompt-api"
+primary_region = "nrt"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  LISTEN_HOST = "0.0.0.0"
+  ENV = "production"
+  INVESTIGATE_ENABLED = "false"
+  ALLOWED_ORIGINS = "https://prompt.tattsum.com"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    timeout = "5s"
+    type = "tcp"
+    port = 8080
