@@ -1,0 +1,10 @@
+name = "translate-prompt-api-proxy"
+main = "workers/src/index.ts"
+compatibility_date = "2025-01-01"
+
+routes = [
+  { pattern = "api.prompt.tattsum.com/*", zone_name = "tattsum.com" }
+]
+
+[vars]
+# ORIGIN_URL is set via: wrangler secret put ORIGIN_URL

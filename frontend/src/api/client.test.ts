@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { analyze, estimate } from './client'
 
 vi.mock('@connectrpc/connect-web', () => ({
@@ -43,5 +43,42 @@ describe('API client', () => {
       tokenizer: 'cl100k_base',
     })
     expect(res.status).toBe('ready')
+  })
+})
+
+describe('API base URL configuration', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('uses relative paths when VITE_API_BASE_URL is unset', async () => {
+    const urql = await import('urql')
+    const connectWeb = await import('@connectrpc/connect-web')
+    await import('./client')
+
+    expect(urql.createClient).toHaveBeenCalledWith(
+      expect.objectContaining({ url: '/query' }),
+    )
+    expect(connectWeb.createConnectTransport).toHaveBeenCalledWith({ baseUrl: '/' })
+  })
+
+  it('uses VITE_API_BASE_URL when set', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.prompt.tattsum.com')
+
+    const urql = await import('urql')
+    const connectWeb = await import('@connectrpc/connect-web')
+    await import('./client')
+
+    expect(urql.createClient).toHaveBeenCalledWith(
+      expect.objectContaining({ url: 'https://api.prompt.tattsum.com/query' }),
+    )
+    expect(connectWeb.createConnectTransport).toHaveBeenCalledWith({
+      baseUrl: 'https://api.prompt.tattsum.com',
+    })
   })
 })

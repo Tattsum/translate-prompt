@@ -1,4 +1,4 @@
-.PHONY: help test lint lint-fix fmt build build-cli build-server web-build web-install serve dev clean install-tools deps gofix codegen
+.PHONY: help test lint lint-fix fmt build build-cli build-server build-server-api web-build web-install serve dev clean install-tools deps gofix codegen
 
 BIN_DIR := bin
 GO := go
@@ -58,6 +58,10 @@ build-cli: ## Build translate-prompt CLI
 build-server: web-build ## Build server with embedded SPA
 	@mkdir -p $(BIN_DIR)
 	$(GO) build -o $(BIN_DIR)/server ./backend/cmd/server
+
+build-server-api: ## Build API-only server (no embedded SPA, for production)
+	@mkdir -p $(BIN_DIR)
+	$(GO) build -tags noembed -o $(BIN_DIR)/server-api ./backend/cmd/server
 
 web-install: ## Install frontend dependencies
 	cd frontend && $(PNPM) install

@@ -7,11 +7,16 @@ import (
 
 // Resolver is the gqlgen root resolver.
 type Resolver struct {
-	OptimizeUC *optimize.UseCase
-	IntakeUC   *appintake.UseCase
+	OptimizeUC         *optimize.UseCase
+	IntakeUC           *appintake.UseCase
+	InvestigateEnabled bool
 }
 
 // NewResolver wires application use cases into GraphQL resolvers.
-func NewResolver(opt *optimize.UseCase, intake *appintake.UseCase) *Resolver {
-	return &Resolver{OptimizeUC: opt, IntakeUC: intake}
+func NewResolver(opt *optimize.UseCase, intake *appintake.UseCase, investigateEnabled bool) *Resolver {
+	return &Resolver{
+		OptimizeUC:         opt,
+		IntakeUC:           intake,
+		InvestigateEnabled: investigateEnabled,
+	}
 }

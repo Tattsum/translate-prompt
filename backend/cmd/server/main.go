@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/Tattsum/translate-prompt/backend/application/optimize"
 	"github.com/Tattsum/translate-prompt/backend/graph"
 	infraBP "github.com/Tattsum/translate-prompt/backend/infrastructure/bestpractice"
+	"github.com/Tattsum/translate-prompt/backend/infrastructure/config"
 	"github.com/Tattsum/translate-prompt/backend/presentation/connectrpc"
 )
 
@@ -31,6 +33,8 @@ const (
 func main() {
 	port := flag.Int("port", 8080, "listen port")
 	flag.Parse()
+
+	cfg := config.LoadServerFromEnv(*port)
 
 	loader, err := infraBP.NewLoader()
 	if err != nil {
@@ -45,7 +49,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	gqlResolver := graph.NewResolver(optUC, intakeUC)
+	gqlResolver := graph.NewResolver(optUC, intakeUC, cfg.InvestigateEnabled)
 	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: gqlResolver}))
 	mux.Handle(graphQLEndpoint, gqlServer)
 
@@ -53,10 +57,10 @@ func main() {
 		mux.Handle(playgroundEndpoint, playground.Handler("translate-prompt", graphQLEndpoint))
 	}
 
-	connectrpc.Mount(mux, connectrpc.NewService(optUC, intakeUC))
+	connectrpc.Mount(mux, connectrpc.NewService(optUC, intakeUC, cfg.InvestigateEnabled))
 	registerSPA(mux)
 
-	addr := fmt.Sprintf("127.0.0.1:%d", *port)
+	addr := fmt.Sprintf("%s:%d", cfg.ListenHost, cfg.Port)
 	log.Printf("listening on http://%s (GraphQL %s, Connect RPC)", addr, graphQLEndpoint)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -64,7 +68,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           corsMiddleware(mux),
+		Handler:           corsMiddleware(cfg.AllowedOrigins, mux),
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 	go func() {
@@ -79,15 +83,50 @@ func main() {
 	}
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
+func corsMiddleware(allowedOrigins []string, next http.Handler) http.Handler {
+	allowAll := len(allowedOrigins) == 1 && allowedOrigins[0] == "*"
+	allowed := make(map[string]struct{}, len(allowedOrigins))
+	for _, origin := range allowedOrigins {
+		allowed[origin] = struct{}{}
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		if allowAll {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+		} else if origin != "" {
+			if _, ok := allowed[origin]; ok {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Add("Vary", "Origin")
+			}
+		}
+
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Connect-Protocol-Version, Connect-Timeout-Ms")
+
 		if r.Method == http.MethodOptions {
+			if !allowAll && origin != "" {
+				if _, ok := allowed[origin]; !ok {
+					w.WriteHeader(http.StatusForbidden)
+					return
+				}
+			}
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
+}
+
+func isOriginAllowed(origin string, allowedOrigins []string) bool {
+	if len(allowedOrigins) == 1 && allowedOrigins[0] == "*" {
+		return true
+	}
+	for _, allowed := range allowedOrigins {
+		if strings.EqualFold(allowed, origin) {
+			return true
+		}
+	}
+	return false
 }

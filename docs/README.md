@@ -11,6 +11,11 @@
 5. [api.md](./api.md) — REST API / CLI 仕様
 6. [implementation-roadmap.md](./implementation-roadmap.md) — Phase 1 実装チェックリスト
 
+## Web 公開（デプロイ）
+
+7. [deployment.md](./deployment.md) — Cloudflare 中心の本番構成・合意内容・実装仕様
+8. [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — デプロイ実装チェックリスト（別セッション用）
+
 ## プロジェクト概要
 
 **translate-prompt** は、エージェント向けプロンプト（タスク指示 + ルール + スキル + コード + 履歴）を、公式ベストプラクティスに沿って整形しつつトークン予算内に最適化する Go ツールです。
