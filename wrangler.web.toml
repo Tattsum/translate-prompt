@@ -7,4 +7,4 @@ routes = [
 ]
 
 [vars]
-PAGES_HOST = "translate-prompt.pages.dev"
+PAGES_HOST = "translate-prompt-2el.pages.dev"

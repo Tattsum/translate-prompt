@@ -12,7 +12,7 @@ set -euo pipefail
 
 SPA_URL="${SPA_URL:-https://translate.tattsum.com}"
 API_URL="${API_URL:-https://prompt-api.tattsum.com}"
-PAGES_URL="${PAGES_URL:-https://translate-prompt.pages.dev}"
+PAGES_URL="${PAGES_URL:-https://translate-prompt-2el.pages.dev}"
 FLY_URL="${FLY_URL:-https://translate-prompt-api.fly.dev}"
 
 RED='\033[0;31m'

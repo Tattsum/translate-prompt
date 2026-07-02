@@ -2,7 +2,7 @@ export interface WebEnv {
   PAGES_HOST: string
 }
 
-const defaultPagesHost = 'translate-prompt.pages.dev'
+const defaultPagesHost = 'translate-prompt-2el.pages.dev'
 
 /** Build a request targeting Cloudflare Pages (Host header must match the Pages hostname). */
 export function buildPagesRequest(request: Request, pagesHost: string): Request {
