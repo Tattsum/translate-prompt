@@ -1,16 +1,26 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases"
+  ],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 10am on monday"],
+  "labels": ["dependencies"],
+  "commitMessagePrefix": "chore(deps):",
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "automerge": false,
+  "forkProcessing": "disabled",
+  "rangeStrategy": "update-lockfile",
+  "separateMinorPatch": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 10am on the first day of the month"]
+  },
   "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch"
-    },
-    {
-      "matchDepTypes": ["indirect"],
-      "enabled": true
-    },
     {
       "matchManagers": ["npm"],
       "matchFileNames": ["frontend/package.json"],
@@ -18,33 +28,43 @@
       "groupSlug": "frontend"
     },
     {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["workers/package.json"],
+      "groupName": "workers dependencies",
+      "groupSlug": "workers"
+    },
+    {
       "matchManagers": ["gomod"],
       "groupName": "Go modules",
-      "groupSlug": "gomod"
+      "groupSlug": "gomod",
+      "postUpdateOptions": ["gomodTidy"]
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions"
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "groupName": "Docker",
+      "groupSlug": "docker"
+    },
+    {
+      "matchManagers": ["regex"],
+      "groupName": "toolchain pins",
+      "groupSlug": "toolchain"
     },
     {
       "matchPackageNames": ["github.com/pkoukk/tiktoken-go"],
       "groupName": "tokenizer"
+    },
+    {
+      "description": "flyctl-actions は master 追従のため Renovate 対象外",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["superfly/flyctl-actions"],
+      "enabled": false
     }
   ],
-  "prConcurrentLimit": 3,
-  "prHourlyLimit": 2,
-  "schedule": ["before 10am on monday"],
-  "timezone": "Asia/Tokyo",
-  "automerge": false,
-  "labels": ["dependencies"],
-  "commitMessagePrefix": "chore(deps):",
-  "semanticCommits": "enabled",
-  "separateMinorPatch": true,
-  "rangeStrategy": "update-lockfile",
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["before 10am on the first day of the month"]
-  },
-  "go": {
-    "enabled": true,
-    "postUpdateOptions": ["gomodTidy"]
-  },
   "regexManagers": [
     {
       "description": "Pin Go toolchain in mise.toml",
@@ -61,6 +81,31 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "golangci/golangci-lint",
       "versioningTemplate": "semver"
+    },
+    {
+      "description": "Pin gqlgen in Makefile",
+      "fileMatch": ["^Makefile$"],
+      "matchStrings": ["gqlgen@(?<currentValue>v?[0-9.]+)"],
+      "datasourceTemplate": "go",
+      "depNameTemplate": "github.com/99designs/gqlgen",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "Pin golangci-lint in Makefile",
+      "fileMatch": ["^Makefile$"],
+      "matchStrings": ["golangci-lint@(?<currentValue>v?[0-9.]+)"],
+      "datasourceTemplate": "go",
+      "depNameTemplate": "github.com/golangci/golangci-lint/v2/cmd/golangci-lint",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "Pin buf remote plugins in buf.gen.yaml",
+      "fileMatch": ["^backend/buf\\.gen\\.yaml$"],
+      "matchStrings": [
+        "remote: buf\\.build/(?<depName>[^:]+):(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
     }
   ]
 }

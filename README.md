@@ -41,6 +41,15 @@ cat prompt.md | ./bin/translate-prompt --max-tokens 8000 --target-profile codex
 | [docs/implementation-roadmap.md](./docs/implementation-roadmap.md) | 実装チェックリスト |
 | [docs/deployment.md](./docs/deployment.md) | Web 公開デプロイ設計（Cloudflare） |
 
+## 依存関係の自動更新（Renovate）
+
+[`renovate.json`](./renovate.json) で Go / npm（frontend・workers）/ GitHub Actions / Docker / ツールチェーン（mise・Makefile・buf）を管理します。
+
+- **GitHub Actions**: [`.github/workflows/renovate.yml`](./.github/workflows/renovate.yml) が毎週月曜 10:00 JST に実行され、更新 PR を作成します
+- **Dependency Dashboard**: Renovate が Issue を 1 件作成し、保留中の更新を一覧できます
+
+[Mend Renovate GitHub App](https://github.com/apps/renovate) を併用する場合は、Actions ワークフローと二重実行にならないようどちらか一方にしてください。
+
 ## 設計原則
 
 - **ルールで整形できることは LLM に投げない**（Phase 1 はルールベースのみ）
