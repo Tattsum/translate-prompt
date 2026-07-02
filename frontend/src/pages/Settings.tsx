@@ -4,6 +4,8 @@ import type { TargetProfile } from '../api/types'
 
 const profiles: TargetProfile[] = ['claude', 'codex', 'openai', 'devin', 'cursor']
 
+const enableWorkspacePath = import.meta.env.VITE_ENABLE_WORKSPACE_PATH === 'true'
+
 export function SettingsPage() {
   const { config, setConfig } = useApp()
 
@@ -54,15 +56,17 @@ export function SettingsPage() {
             />{' '}
             深堀り (Intake) を有効化
           </label>
-          <label style={{ display: 'block', marginTop: '1rem' }}>
-            Workspace Path
-            <input
-              type="text"
-              value={config.workspace_path ?? ''}
-              onChange={(e) => setConfig({ ...config, workspace_path: e.target.value })}
-              placeholder="/path/to/repo"
-            />
-          </label>
+          {enableWorkspacePath && (
+            <label style={{ display: 'block', marginTop: '1rem' }}>
+              Workspace Path
+              <input
+                type="text"
+                value={config.workspace_path ?? ''}
+                onChange={(e) => setConfig({ ...config, workspace_path: e.target.value })}
+                placeholder="/path/to/repo"
+              />
+            </label>
+          )}
         </div>
       </main>
     </>
