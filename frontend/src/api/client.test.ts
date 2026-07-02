@@ -68,17 +68,17 @@ describe('API base URL configuration', () => {
   })
 
   it('uses VITE_API_BASE_URL when set', async () => {
-    vi.stubEnv('VITE_API_BASE_URL', 'https://api.prompt.tattsum.com')
+    vi.stubEnv('VITE_API_BASE_URL', 'https://prompt-api.tattsum.com')
 
     const urql = await import('urql')
     const connectWeb = await import('@connectrpc/connect-web')
     await import('./client')
 
     expect(urql.createClient).toHaveBeenCalledWith(
-      expect.objectContaining({ url: 'https://api.prompt.tattsum.com/query' }),
+      expect.objectContaining({ url: 'https://prompt-api.tattsum.com/query' }),
     )
     expect(connectWeb.createConnectTransport).toHaveBeenCalledWith({
-      baseUrl: 'https://api.prompt.tattsum.com',
+      baseUrl: 'https://prompt-api.tattsum.com',
     })
   })
 })

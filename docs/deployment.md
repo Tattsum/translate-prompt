@@ -19,7 +19,7 @@
 | CI/CD | **GitHub Actions**（Fly + Pages + Workers 自動デプロイ） |
 | ドメイン | **tattsum.com**（Cloudflare DNS 管理済み） |
 | SPA URL | `https://prompt.tattsum.com` |
-| API URL | `https://api.prompt.tattsum.com` |
+| API URL | `https://prompt-api.tattsum.com` |
 
 ### 見送り（Phase 2 以降）
 
@@ -38,7 +38,7 @@
     ▼
 [Cloudflare Access]  ← Google / GitHub ログイン（招待制）
     ├─ prompt.tattsum.com ────── Cloudflare Pages（React SPA）
-    └─ api.prompt.tattsum.com ── Cloudflare Workers（API プロキシ）
+    └─ prompt-api.tattsum.com ── Cloudflare Workers（API プロキシ）
             │
             │ Cloudflare Tunnel（cloudflared、Fly 内で常駐）
             ▼
@@ -76,7 +76,7 @@
 | バインド | `127.0.0.1` のみ（`backend/cmd/server/main.go` L59） | `0.0.0.0`（Fly 内） |
 | CORS | `Access-Control-Allow-Origin: *` | `https://prompt.tattsum.com` のみ |
 | SPA 配信 | `go:embed`（`backend/cmd/server/spa.go`） | Pages に分離。サーバは API のみ |
-| API ベース URL | 相対パス `/query`, `/`（`frontend/src/api/client.ts`） | `https://api.prompt.tattsum.com` |
+| API ベース URL | 相対パス `/query`, `/`（`frontend/src/api/client.ts`） | `https://prompt-api.tattsum.com` |
 | Investigate | Web/CLI 両方有効 | Web 無効（環境変数ガード） |
 | Workspace Path UI | Settings に入力欄あり | Web 本番では非表示 |
 | デプロイ設定 | なし | Dockerfile, fly.toml, wrangler.toml, CI |
@@ -90,7 +90,7 @@ Cloudflare ダッシュボードで以下を設定する（実装セッション
 | レコード | タイプ | 向き先 |
 |---------|--------|--------|
 | `prompt` | CNAME | Cloudflare Pages プロジェクトの `*.pages.dev` |
-| `api.prompt` | CNAME | Workers カスタムドメイン（自動設定） |
+| `prompt-api` | CNAME / Worker | Workers カスタムドメイン（自動設定） |
 
 **注意**: Fly のパブリック URL は DNS に載せない。Tunnel 経由のみ。
 
@@ -193,7 +193,7 @@ main = "workers/src/index.ts"
 compatibility_date = "2025-01-01"
 
 routes = [
-  { pattern = "api.prompt.tattsum.com/*", zone_name = "tattsum.com" }
+  { pattern = "prompt-api.tattsum.com/*", zone_name = "tattsum.com" }
 ]
 
 [vars]
@@ -235,7 +235,7 @@ routes = [
 
 | 変数 | 値 |
 |------|-----|
-| `VITE_API_BASE_URL` | `https://api.prompt.tattsum.com` |
+| `VITE_API_BASE_URL` | `https://prompt-api.tattsum.com` |
 | `VITE_ENABLE_WORKSPACE_PATH` | `false` |
 
 #### フロントエンド変更（`client.ts`）
@@ -257,7 +257,7 @@ Zero Trust ダッシュボードで設定（手動・初回のみ）。
 
 1. **Applications** → Add application → Self-hosted
 2. アプリ 1: `prompt.tattsum.com`（Pages）
-3. アプリ 2: `api.prompt.tattsum.com`（Workers）
+3. アプリ 2: `prompt-api.tattsum.com`（Workers）
 4. **Policy**: Allow — Emails ending in `@<your-email-domain>` または特定メール / GitHub OAuth
 5. β 招待者はメールまたは IdP グループで追加
 
@@ -355,7 +355,7 @@ jobs:
 
 **完了条件**:
 
-- [ ] 本番ビルドで API が `api.prompt.tattsum.com` を向く
+- [ ] 本番ビルドで API が `prompt-api.tattsum.com` を向く
 - [ ] Workspace Path が本番ビルドで非表示
 
 ### WP-3: Workers プロキシ
@@ -457,7 +457,7 @@ npx wrangler deploy
 |---|---------|---------|
 | 1 | 未認証で `prompt.tattsum.com` にアクセス | Access ログイン画面 |
 | 2 | 認証後 SPA 表示 | Input ページが表示 |
-| 3 | Health | `api.prompt.tattsum.com` 経由で Connect Health が `ok` |
+| 3 | Health | `prompt-api.tattsum.com` 経由で Connect Health が `ok` |
 | 4 | Estimate | トークン数が返る |
 | 5 | Analyze | 質問または ready が返る |
 | 6 | Optimize | 最適化結果とレポートが返る |
