@@ -1,0 +1,10 @@
+name = "translate-prompt-web"
+main = "workers/src/web.ts"
+compatibility_date = "2025-01-01"
+
+routes = [
+  { pattern = "translate.tattsum.com/*", zone_name = "tattsum.com" }
+]
+
+[vars]
+PAGES_HOST = "translate-prompt.pages.dev"

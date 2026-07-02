@@ -28,7 +28,7 @@ func TestCorsMiddleware_AllowAll(t *testing.T) {
 func TestCorsMiddleware_AllowedOrigin(t *testing.T) {
 	t.Parallel()
 	req := httptest.NewRequest(http.MethodOptions, "/query", nil)
-	origin := "https://prompt.tattsum.com"
+	origin := "https://translate.tattsum.com"
 	req.Header.Set("Origin", origin)
 	rec := httptest.NewRecorder()
 
@@ -51,7 +51,7 @@ func TestCorsMiddleware_DisallowedOriginPreflight(t *testing.T) {
 	req.Header.Set("Origin", "https://evil.example")
 	rec := httptest.NewRecorder()
 
-	handler := corsMiddleware([]string{"https://prompt.tattsum.com"}, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	handler := corsMiddleware([]string{"https://translate.tattsum.com"}, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	handler.ServeHTTP(rec, req)
@@ -66,8 +66,8 @@ func TestCorsMiddleware_DisallowedOriginPreflight(t *testing.T) {
 
 func TestIsOriginAllowed(t *testing.T) {
 	t.Parallel()
-	allowed := []string{"https://prompt.tattsum.com"}
-	if !isOriginAllowed("https://prompt.tattsum.com", allowed) {
+	allowed := []string{"https://translate.tattsum.com"}
+	if !isOriginAllowed("https://translate.tattsum.com", allowed) {
 		t.Fatal("expected allowed origin")
 	}
 	if isOriginAllowed("https://evil.example", allowed) {

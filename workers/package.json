@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev --config ../wrangler.toml",
-    "deploy": "wrangler deploy --config ../wrangler.toml"
+    "dev:web": "wrangler dev --config ../wrangler.web.toml",
+    "deploy": "wrangler deploy --config ../wrangler.toml",
+    "deploy:web": "wrangler deploy --config ../wrangler.web.toml"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250317.0",

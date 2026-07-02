@@ -3,7 +3,7 @@ main = "workers/src/index.ts"
 compatibility_date = "2025-01-01"
 
 routes = [
-  { pattern = "api.prompt.tattsum.com/*", zone_name = "tattsum.com" }
+  { pattern = "prompt-api.tattsum.com/*", zone_name = "tattsum.com" }
 ]
 
 [vars]

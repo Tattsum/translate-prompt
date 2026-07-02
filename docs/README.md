@@ -13,8 +13,11 @@
 
 ## Web 公開（デプロイ）
 
-7. [deployment.md](./deployment.md) — Cloudflare 中心の本番構成・合意内容・実装仕様
-8. [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — デプロイ実装チェックリスト（別セッション用）
+7. [deployment-session-handoff.md](./deployment-session-handoff.md) — **現状スナップショット・次セッション引き継ぎ（最優先）**
+8. [deployment.md](./deployment.md) — Cloudflare 中心の本番構成・合意内容・実装仕様
+9. [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — デプロイ実装チェックリスト（進捗管理用）
+10. [deployment-dns-setup.md](./deployment-dns-setup.md) — DNS / Workers Route（SPA 手動設定）
+11. [deployment-access-setup.md](./deployment-access-setup.md) — Cloudflare Access 手動設定
 
 ## プロジェクト概要
 

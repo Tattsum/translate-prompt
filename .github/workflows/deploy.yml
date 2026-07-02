@@ -38,6 +38,15 @@ jobs:
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 
+      - name: Sync Fly secrets
+        run: |
+          flyctl secrets set \
+            ALLOWED_ORIGINS=https://translate.tattsum.com \
+            INVESTIGATE_ENABLED=false \
+            --stage
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
       - name: Deploy to Fly.io
         run: flyctl deploy --local-only --ha=false --depot=false --wait-timeout 15m
         env:
@@ -71,9 +80,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Deploy Workers
+      - name: Deploy API proxy Worker
         working-directory: workers
         run: pnpm exec wrangler deploy --config ../wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy SPA proxy Worker
+        working-directory: workers
+        run: pnpm exec wrangler deploy --config ../wrangler.web.toml
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

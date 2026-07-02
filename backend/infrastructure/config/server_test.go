@@ -30,7 +30,7 @@ func TestLoadServerFromEnv_Defaults(t *testing.T) {
 func TestLoadServerFromEnv_Production(t *testing.T) {
 	t.Setenv("LISTEN_HOST", "0.0.0.0")
 	t.Setenv("PORT", "9090")
-	t.Setenv("ALLOWED_ORIGINS", "https://prompt.tattsum.com")
+	t.Setenv("ALLOWED_ORIGINS", "https://translate.tattsum.com")
 	t.Setenv("INVESTIGATE_ENABLED", "false")
 
 	cfg := config.LoadServerFromEnv(8080)
@@ -40,7 +40,7 @@ func TestLoadServerFromEnv_Production(t *testing.T) {
 	if cfg.Port != 9090 {
 		t.Fatalf("Port = %d, want 9090", cfg.Port)
 	}
-	if len(cfg.AllowedOrigins) != 1 || cfg.AllowedOrigins[0] != "https://prompt.tattsum.com" {
+	if len(cfg.AllowedOrigins) != 1 || cfg.AllowedOrigins[0] != "https://translate.tattsum.com" {
 		t.Fatalf("AllowedOrigins = %v", cfg.AllowedOrigins)
 	}
 	if cfg.InvestigateEnabled {
