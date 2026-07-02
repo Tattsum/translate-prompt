@@ -84,6 +84,6 @@ make dev     # Vite :5173（/query, Connect をプロキシ）
 | 環境 | SPA | API | 認証 |
 |------|-----|-----|------|
 | ローカル | `make serve`（go:embed）または `make dev`（Vite） | `:8080` | なし |
-| 本番 β | Cloudflare Pages（`prompt.tattsum.com`） | Workers → Tunnel → Fly.io（`prompt-api.tattsum.com`） | Cloudflare Access |
+| 本番 β | Cloudflare Pages（`translate.tattsum.com`） | Workers → Tunnel → Fly.io（`prompt-api.tattsum.com`） | Cloudflare Access |
 
 本番では Investigate（サーバー FS 読み取り）は Web から無効。CLI のみ。

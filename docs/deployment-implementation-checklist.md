@@ -5,7 +5,7 @@
 ## 前提
 
 - 合意済み: 招待制 β / Fly.io / Pages / Workers / Tunnel / Access
-- ドメイン: `prompt.tattsum.com`, `prompt-api.tattsum.com`
+- ドメイン: `translate.tattsum.com`, `prompt-api.tattsum.com`
 - DNS: `tattsum.com` は Cloudflare 管理済み
 
 ---
@@ -54,7 +54,7 @@
 - [ ] Pages プロジェクト作成・Git 連携
 - [ ] DNS: `prompt` CNAME → Pages
 - [ ] DNS: `prompt-api` → Workers
-- [ ] Access: `prompt.tattsum.com` アプリ + ポリシー
+- [ ] Access: `translate.tattsum.com` アプリ + ポリシー
 - [ ] Access: `prompt-api.tattsum.com` アプリ + ポリシー
 - [ ] GitHub Secrets 設定（`FLY_API_TOKEN`, `CLOUDFLARE_*`）
 

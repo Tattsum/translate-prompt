@@ -18,7 +18,7 @@
 | DB | **当面なし**（ステートレス） |
 | CI/CD | **GitHub Actions**（Fly + Pages + Workers 自動デプロイ） |
 | ドメイン | **tattsum.com**（Cloudflare DNS 管理済み） |
-| SPA URL | `https://prompt.tattsum.com` |
+| SPA URL | `https://translate.tattsum.com` |
 | API URL | `https://prompt-api.tattsum.com` |
 
 ### 見送り（Phase 2 以降）
@@ -37,7 +37,7 @@
     │ HTTPS
     ▼
 [Cloudflare Access]  ← Google / GitHub ログイン（招待制）
-    ├─ prompt.tattsum.com ────── Cloudflare Pages（React SPA）
+    ├─ translate.tattsum.com ────── Cloudflare Pages（React SPA）
     └─ prompt-api.tattsum.com ── Cloudflare Workers（API プロキシ）
             │
             │ Cloudflare Tunnel（cloudflared、Fly 内で常駐）
@@ -74,7 +74,7 @@
 | 項目 | 現状 | 本番要件 |
 |------|------|---------|
 | バインド | `127.0.0.1` のみ（`backend/cmd/server/main.go` L59） | `0.0.0.0`（Fly 内） |
-| CORS | `Access-Control-Allow-Origin: *` | `https://prompt.tattsum.com` のみ |
+| CORS | `Access-Control-Allow-Origin: *` | `https://translate.tattsum.com` のみ |
 | SPA 配信 | `go:embed`（`backend/cmd/server/spa.go`） | Pages に分離。サーバは API のみ |
 | API ベース URL | 相対パス `/query`, `/`（`frontend/src/api/client.ts`） | `https://prompt-api.tattsum.com` |
 | Investigate | Web/CLI 両方有効 | Web 無効（環境変数ガード） |
@@ -89,7 +89,7 @@ Cloudflare ダッシュボードで以下を設定する（実装セッション
 
 | レコード | タイプ | 向き先 |
 |---------|--------|--------|
-| `prompt` | CNAME | Cloudflare Pages プロジェクトの `*.pages.dev` |
+| `translate` | CNAME | Cloudflare Pages プロジェクトの `*.pages.dev` |
 | `prompt-api` | CNAME / Worker | Workers カスタムドメイン（自動設定） |
 
 **注意**: Fly のパブリック URL は DNS に載せない。Tunnel 経由のみ。
@@ -143,7 +143,7 @@ frontend/.env.production            # VITE_API_BASE_URL（git 管理可、秘密
 | `PORT` | `8080` | `8080` |
 | `ENV` | `dev` | `production` |
 | `INVESTIGATE_ENABLED` | `true`（省略可） | `false` |
-| `ALLOWED_ORIGINS` | `*`（省略可） | `https://prompt.tattsum.com` |
+| `ALLOWED_ORIGINS` | `*`（省略可） | `https://translate.tattsum.com` |
 
 #### Dockerfile（方針）
 
@@ -168,7 +168,7 @@ primary_region = "nrt"  # 東京リージョン
   LISTEN_HOST = "0.0.0.0"
   ENV = "production"
   INVESTIGATE_ENABLED = "false"
-  ALLOWED_ORIGINS = "https://prompt.tattsum.com"
+  ALLOWED_ORIGINS = "https://translate.tattsum.com"
 
 [http_service]
   internal_port = 8080
@@ -256,7 +256,7 @@ const connectTransport = createConnectTransport({ baseUrl: apiBase || '/' })
 Zero Trust ダッシュボードで設定（手動・初回のみ）。
 
 1. **Applications** → Add application → Self-hosted
-2. アプリ 1: `prompt.tattsum.com`（Pages）
+2. アプリ 1: `translate.tattsum.com`（Pages）
 3. アプリ 2: `prompt-api.tattsum.com`（Workers）
 4. **Policy**: Allow — Emails ending in `@<your-email-domain>` または特定メール / GitHub OAuth
 5. β 招待者はメールまたは IdP グループで追加
@@ -397,7 +397,7 @@ jobs:
 
 **完了条件**:
 
-- [ ] Access ログイン後に `prompt.tattsum.com` が表示
+- [ ] Access ログイン後に `translate.tattsum.com` が表示
 - [ ] Analyze → Optimize フローが動作
 - [ ] Investigate が Web から失敗する（期待通り）
 
@@ -411,7 +411,7 @@ jobs:
 # 初回のみ
 fly auth login
 fly apps create translate-prompt-api
-fly secrets set INVESTIGATE_ENABLED=false ALLOWED_ORIGINS=https://prompt.tattsum.com
+fly secrets set INVESTIGATE_ENABLED=false ALLOWED_ORIGINS=https://translate.tattsum.com
 
 # デプロイ（CI 整備後は Actions から）
 fly deploy
@@ -440,7 +440,7 @@ npx wrangler deploy
 
 1. Workers & Pages → Create → Connect to Git
 2. リポジトリ選択、ビルド設定は上表参照
-3. カスタムドメイン `prompt.tattsum.com` を追加
+3. カスタムドメイン `translate.tattsum.com` を追加
 4. 環境変数 `VITE_API_BASE_URL`, `VITE_ENABLE_WORKSPACE_PATH` を設定
 
 ### E. Cloudflare Access
@@ -455,7 +455,7 @@ npx wrangler deploy
 
 | # | 確認項目 | 期待結果 |
 |---|---------|---------|
-| 1 | 未認証で `prompt.tattsum.com` にアクセス | Access ログイン画面 |
+| 1 | 未認証で `translate.tattsum.com` にアクセス | Access ログイン画面 |
 | 2 | 認証後 SPA 表示 | Input ページが表示 |
 | 3 | Health | `prompt-api.tattsum.com` 経由で Connect Health が `ok` |
 | 4 | Estimate | トークン数が返る |
@@ -463,7 +463,7 @@ npx wrangler deploy
 | 6 | Optimize | 最適化結果とレポートが返る |
 | 7 | Investigate（Web） | 403 / エラー（無効化確認） |
 | 8 | CLI Investigate | ローカルで従来どおり動作 |
-| 9 | CORS | `prompt.tattsum.com` 以外のオリジンから API が拒否される |
+| 9 | CORS | `translate.tattsum.com` 以外のオリジンから API が拒否される |
 | 10 | Playground | 本番では `/playground` が 404 |
 
 ---
@@ -472,7 +472,7 @@ npx wrangler deploy
 
 - [ ] Fly オリジンは Tunnel 経由のみ（パブリック HTTP 最小化）
 - [ ] `INVESTIGATE_ENABLED=false`（サーバ FS 読み取り防止）
-- [ ] CORS は `prompt.tattsum.com` のみ
+- [ ] CORS は `translate.tattsum.com` のみ
 - [ ] Access ポリシーで招待者限定
 - [ ] GraphQL Playground は本番無効（`ENV=production`）
 - [ ] GitHub Secrets に API トークンのみ（`.env` をコミットしない）

@@ -8,7 +8,7 @@ primary_region = "nrt"
   LISTEN_HOST = "0.0.0.0"
   ENV = "production"
   INVESTIGATE_ENABLED = "false"
-  ALLOWED_ORIGINS = "https://prompt.tattsum.com"
+  ALLOWED_ORIGINS = "https://translate.tattsum.com"
 
 [http_service]
   internal_port = 8080
