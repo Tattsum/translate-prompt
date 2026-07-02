@@ -1,0 +1,112 @@
+# translate-prompt GraphQL API (gqlgen)
+
+enum TargetProfile {
+  CLAUDE
+  CODEX
+  OPENAI
+  DEVIN
+  CURSOR
+}
+
+enum AnalyzeStatus {
+  NEEDS_INPUT
+  READY
+}
+
+input OptimizeConfigInput {
+  targetProfile: TargetProfile!
+  maxTokens: Int!
+  tokenizer: String!
+  deepDive: Boolean
+  workspacePath: String
+}
+
+input AnalyzeInput {
+  prompt: String!
+  config: OptimizeConfigInput!
+}
+
+input InvestigateInput {
+  workspacePath: String!
+  targetProfile: TargetProfile!
+}
+
+input OptimizeInput {
+  prompt: String!
+  config: OptimizeConfigInput!
+  answers: Map
+}
+
+scalar Map
+
+type Question {
+  id: ID!
+  text: String!
+  ruleId: String
+}
+
+type AnalyzeResult {
+  status: AnalyzeStatus!
+  questions: [Question!]
+  prompt: String
+}
+
+type InvestigationFile {
+  path: String!
+  sectionType: String!
+  contentPreview: String!
+}
+
+type InvestigationResult {
+  files: [InvestigationFile!]!
+  suggestedCommands: [String!]!
+}
+
+type AppliedRule {
+  id: ID!
+  sourceUrl: String!
+  tokensDelta: Int
+}
+
+type OptimizeReport {
+  inputTokens: Int!
+  outputTokens: Int!
+  reductionPercent: Float!
+  targetProfile: String!
+  appliedRules: [AppliedRule!]!
+  truncatedSections: [String!]!
+}
+
+type MdcSuggestion {
+  filename: String!
+  content: String!
+}
+
+type OptimizeArtifacts {
+  cursorMdcSuggestions: [MdcSuggestion!]
+}
+
+type OptimizeResult {
+  optimizedPrompt: String!
+  artifacts: OptimizeArtifacts!
+  report: OptimizeReport!
+}
+
+type EstimateResult {
+  tokens: Int!
+}
+
+type Health {
+  status: String!
+}
+
+type Query {
+  health: Health!
+  estimate(text: String!, tokenizer: String!): EstimateResult!
+}
+
+type Mutation {
+  analyze(input: AnalyzeInput!): AnalyzeResult!
+  investigate(input: InvestigateInput!): InvestigationResult!
+  optimize(input: OptimizeInput!): OptimizeResult!
+}

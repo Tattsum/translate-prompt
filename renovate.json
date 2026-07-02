@@ -1,0 +1,66 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "matchDepTypes": ["indirect"],
+      "enabled": true
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["frontend/package.json"],
+      "groupName": "frontend dependencies",
+      "groupSlug": "frontend"
+    },
+    {
+      "matchManagers": ["gomod"],
+      "groupName": "Go modules",
+      "groupSlug": "gomod"
+    },
+    {
+      "matchPackageNames": ["github.com/pkoukk/tiktoken-go"],
+      "groupName": "tokenizer"
+    }
+  ],
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "schedule": ["before 10am on monday"],
+  "timezone": "Asia/Tokyo",
+  "automerge": false,
+  "labels": ["dependencies"],
+  "commitMessagePrefix": "chore(deps):",
+  "semanticCommits": "enabled",
+  "separateMinorPatch": true,
+  "rangeStrategy": "update-lockfile",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 10am on the first day of the month"]
+  },
+  "go": {
+    "enabled": true,
+    "postUpdateOptions": ["gomodTidy"]
+  },
+  "regexManagers": [
+    {
+      "description": "Pin Go toolchain in mise.toml",
+      "fileMatch": ["^mise\\.toml$"],
+      "matchStrings": ["go = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "golang/go",
+      "versioningTemplate": "semver-coerced"
+    },
+    {
+      "description": "Pin golangci-lint in mise.toml",
+      "fileMatch": ["^mise\\.toml$"],
+      "matchStrings": ["golangci-lint = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "golangci/golangci-lint",
+      "versioningTemplate": "semver"
+    }
+  ]
+}

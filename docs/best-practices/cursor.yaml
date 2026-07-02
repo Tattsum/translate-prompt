@@ -1,0 +1,108 @@
+profile: cursor
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://cursor.com/docs/rules
+    title: Cursor Rules
+  - url: https://cursor.com/help/customization/rules
+    title: Cursor Rules help
+  - url: https://cursor.com/help/customization/skills
+    title: Cursor Skills
+
+output_template_chat: |
+  {{task_with_at_references}}
+
+output_template_mdc: |
+  ---
+  description: {{description}}
+  globs: {{globs}}
+  alwaysApply: {{always_apply}}
+  ---
+
+  {{rule_body}}
+
+rules:
+  - id: cursor-rules-skills-split
+    description: 短い規約を Rules 案へ、手順を @skill 参照へ
+    source_url: https://cursor.com/help/customization/skills
+    source_section: "Rules vs Skills"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: split_rules_and_skills
+    intake_on_failure: true
+
+  - id: cursor-at-reference
+    description: コードブロックを @path 参照に置換
+    source_url: https://cursor.com/docs/rules
+    source_section: "Reference files instead of copying"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: replace_code_with_at_reference
+    intake_on_failure: true
+
+  - id: cursor-rules-budget
+    description: alwaysApply 相当を 200 語/50 行以下に圧縮
+    source_url: https://cursor.com/docs/rules
+    source_section: "Keep rules under 500 lines"
+    automatable: true
+    pipeline: compress
+    stage: TruncateByPriority
+    action: enforce_rules_budget
+    limits:
+      max_words: 200
+      max_lines: 50
+    intake_on_failure: true
+
+  - id: cursor-mdc-generate
+    description: .mdc frontmatter 付き推奨案を生成
+    source_url: https://cursor.com/docs/rules
+    source_section: "Project rules must use .mdc"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: generate_mdc_artifact
+
+  - id: cursor-agents-md
+    description: 規約が少ない場合 AGENTS.md を推奨
+    source_url: https://cursor.com/docs/rules
+    source_section: "use AGENTS.md instead"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: suggest_agents_md
+    condition:
+      total_rule_lines_lt: "30"
+
+  - id: cursor-rule-split
+    description: 複合ルールを関心ごとに複数 .mdc に分割提案
+    source_url: https://cursor.com/help/customization/rules
+    source_section: "Split large rules into focused files"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: split_composite_rules
+
+  - id: cursor-actionable
+    description: 曖昧規約を具体的制約に変換
+    source_url: https://cursor.com/docs/rules
+    source_section: "Avoid vague guidance"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    patterns:
+      - "きれいに"
+      - "clean code"
+      - "best practices"
+    action: make_actionable
+    intake_on_failure: true
+
+  - id: cursor-minimal-context
+    description: エージェント既知情報（npm/git 等の説明）を除去
+    source_url: https://cursor.com/docs/rules
+    source_section: "Documenting every possible command"
+    automatable: true
+    pipeline: compress
+    stage: RemoveBoilerplate
+    action: remove_agent_known_facts

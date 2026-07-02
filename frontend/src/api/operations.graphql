@@ -1,0 +1,58 @@
+mutation Analyze($input: AnalyzeInput!) {
+  analyze(input: $input) {
+    status
+    prompt
+    questions {
+      id
+      text
+      ruleId
+    }
+  }
+}
+
+mutation Investigate($input: InvestigateInput!) {
+  investigate(input: $input) {
+    files {
+      path
+      sectionType
+      contentPreview
+    }
+    suggestedCommands
+  }
+}
+
+mutation Optimize($input: OptimizeInput!) {
+  optimize(input: $input) {
+    optimizedPrompt
+    artifacts {
+      cursorMdcSuggestions {
+        filename
+        content
+      }
+    }
+    report {
+      inputTokens
+      outputTokens
+      reductionPercent
+      targetProfile
+      appliedRules {
+        id
+        sourceUrl
+        tokensDelta
+      }
+      truncatedSections
+    }
+  }
+}
+
+query Estimate($text: String!, $tokenizer: String!) {
+  estimate(text: $text, tokenizer: $tokenizer) {
+    tokens
+  }
+}
+
+query Health {
+  health {
+    status
+  }
+}

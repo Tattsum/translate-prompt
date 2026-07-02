@@ -1,0 +1,44 @@
+profile: codex
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://developers.openai.com/codex/learn/best-practices
+    title: Codex Best practices
+  - url: https://developers.openai.com/codex/prompting
+    title: Codex Prompting
+  - url: https://developers.openai.com/cookbook/examples/gpt-5/codex_prompting_guide
+    title: Codex Prompting Guide
+
+output_template: |
+  ## Goal
+  {{goal}}
+
+  ## Context
+  {{context}}
+
+  ## Constraints
+  {{constraints}}
+
+  ## Done when
+  {{done_when}}
+
+rules:
+  - id: codex-four-part
+    description: Goal/Context/Constraints/Done when の 4 セクションに再配置
+    source_url: https://developers.openai.com/codex/learn/best-practices
+    source_section: "A good default is to include four things"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: apply_four_part_template
+    intake_on_failure: true
+
+  - id: codex-verify
+    description: ワークスペースから検出した test/lint を Done when に追記
+    source_url: https://developers.openai.com/codex/prompting
+    source_section: "Codex produces higher-quality outputs when it can verify"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: append_verification_commands
+    intake_on_failure: true

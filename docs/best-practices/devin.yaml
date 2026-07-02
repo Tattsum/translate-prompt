@@ -1,0 +1,101 @@
+profile: devin
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://docs.devin.ai/learn-about-devin/prompting
+    title: Devin Prompting Advice
+  - url: https://docs.devin.ai/essential-guidelines/instructing-devin-effectively
+    title: Instructing Devin Effectively
+  - url: https://docs.devin.ai/product-guides/knowledge
+    title: Devin Knowledge
+
+output_template: |
+  ## What
+  {{what}}
+
+  ## How
+  {{how}}
+
+  ## Result
+  {{result}}
+
+output_template_session_brief: |
+  ## Devin Session Brief
+  Goal (one PR-sized outcome): {{goal}}
+  Repo / base branch: {{repo_branch}}
+  Linked ticket / doc: {{ticket}}
+  Context (already gathered): {{context}}
+  Scope — in: {{scope_in}}
+  Scope — out (do NOT touch): {{scope_out}}
+  Acceptance criteria: {{acceptance}}
+  Constraints: {{constraints}}
+  Deliverable: {{deliverable}}
+
+rules:
+  - id: devin-three-part
+    description: What/How/Result テンプレート適用
+    source_url: https://docs.devin.ai/learn-about-devin/prompting
+    source_section: "What / How / Result"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: apply_three_part_template
+    intake_on_failure: true
+
+  - id: devin-specific
+    description: オープンエンド指示の具体化（repo/branch/file）
+    source_url: https://docs.devin.ai/essential-guidelines/instructing-devin-effectively
+    source_section: "Be Opinionated and Specific"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: add_concrete_placeholders
+    intake_on_failure: true
+
+  - id: devin-verify
+    description: test/lint/CI を Result に追記
+    source_url: https://docs.devin.ai/learn-about-devin/prompting
+    source_section: "Tell Devin how to check its progress"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: append_verification_commands
+
+  - id: devin-scope-split
+    description: 複数 PR 相当の要求を検出し分割提案
+    source_url: https://docs.devin.ai/learn-about-devin/prompting
+    source_section: "Split complex tasks"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: detect_overscope
+    intake_on_failure: true
+
+  - id: devin-scope-out
+    description: Session Brief の Scope out 生成
+    source_url: https://docs.devin.ai/essential-guidelines/instructing-devin-effectively
+    source_section: "Define clear scope, boundaries"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: generate_scope_out
+    condition:
+      output_mode: session_brief
+
+  - id: devin-knowledge-split
+    description: Knowledge と Playbook（How）の分離
+    source_url: https://docs.devin.ai/product-guides/knowledge
+    source_section: "Playbooks vs Knowledge"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    action: split_knowledge_playbook
+
+  - id: devin-references
+    description: リンク・チケットを Context に集約
+    source_url: https://docs.devin.ai/learn-about-devin/prompting
+    source_section: "Provide references or examples"
+    automatable: true
+    pipeline: format
+    stage: ReorderOutcomeFirst
+    action: consolidate_references

@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package translate_prompt.v1;
+
+option go_package = "github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1;translatepromptv1";
+
+// TranslatePromptService exposes typed RPCs for CLI and programmatic clients.
+service TranslatePromptService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc Analyze(AnalyzeRequest) returns (AnalyzeResponse);
+  rpc Investigate(InvestigateRequest) returns (InvestigateResponse);
+  rpc Optimize(OptimizeRequest) returns (OptimizeResponse);
+  rpc Estimate(EstimateRequest) returns (EstimateResponse);
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+}
+
+message OptimizeConfig {
+  string target_profile = 1;
+  int32 max_tokens = 2;
+  string tokenizer = 3;
+  bool deep_dive = 4;
+  string workspace_path = 5;
+}
+
+message Question {
+  string id = 1;
+  string text = 2;
+  string rule_id = 3;
+}
+
+message AnalyzeRequest {
+  string prompt = 1;
+  OptimizeConfig config = 2;
+}
+
+message AnalyzeResponse {
+  string status = 1;
+  repeated Question questions = 2;
+  string prompt = 3;
+}
+
+message InvestigateRequest {
+  string workspace_path = 1;
+  string target_profile = 2;
+}
+
+message InvestigationFile {
+  string path = 1;
+  string section_type = 2;
+  string content_preview = 3;
+}
+
+message InvestigateResponse {
+  repeated InvestigationFile files = 1;
+  repeated string suggested_commands = 2;
+}
+
+message OptimizeRequest {
+  string prompt = 1;
+  OptimizeConfig config = 2;
+  map<string, string> answers = 3;
+}
+
+message AppliedRule {
+  string id = 1;
+  string source_url = 2;
+  int32 tokens_delta = 3;
+}
+
+message OptimizeReport {
+  int32 input_tokens = 1;
+  int32 output_tokens = 2;
+  double reduction_percent = 3;
+  string target_profile = 4;
+  repeated AppliedRule applied_rules = 5;
+  repeated string truncated_sections = 6;
+}
+
+message MdcSuggestion {
+  string filename = 1;
+  string content = 2;
+}
+
+message OptimizeArtifacts {
+  repeated MdcSuggestion cursor_mdc_suggestions = 1;
+}
+
+message OptimizeResponse {
+  string optimized_prompt = 1;
+  OptimizeArtifacts artifacts = 2;
+  OptimizeReport report = 3;
+}
+
+message EstimateRequest {
+  string text = 1;
+  string tokenizer = 2;
+}
+
+message EstimateResponse {
+  int32 tokens = 1;
+}

@@ -1,0 +1,30 @@
+# mise toolchain — go.mod と揃える
+[tools]
+go = "1.26.4"
+node = "lts"
+pnpm = "latest"
+golangci-lint = "2.12.2"
+buf = "latest"
+
+[env]
+GOPRIVATE = "github.com/Tattsum/*"
+
+[tasks.fmt]
+description = "Format Go code (go fix x2 + golangci-lint fmt)"
+run = "make fmt"
+
+[tasks.lint]
+description = "Run golangci-lint and frontend lint"
+run = "make lint"
+
+[tasks.test]
+description = "Run all tests"
+run = "make test"
+
+[tasks.serve]
+description = "Run API server with embedded SPA"
+run = "make serve"
+
+[tasks.dev]
+description = "Run Vite dev server"
+run = "make dev"

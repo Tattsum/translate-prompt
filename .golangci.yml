@@ -1,0 +1,70 @@
+# golangci-lint v2 — 実用寄り（github-analytics ベース、Phase 1 向けに厳しすぎるルールは無効）
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - errorlint
+    - misspell
+    - gosec
+    - revive
+  disable:
+    # Phase 1: 静的エラー定義・定数化・複雑度は後続 PR で段階的に有効化
+    - err113
+    - goconst
+    - cyclop
+    - funlen
+    - gocritic
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+      exclude-functions:
+        - fmt:.*
+        - io:Close
+        - io:WriteString
+
+    gosec:
+      excludes:
+        - G104
+        - G112
+        - G118
+        - G306
+        - G304
+        - G115
+
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - frontend/dist
+      - backend/infrastructure/bestpractice/rules
+      - backend/graph/generated.go
+      - backend/gen
+    rules:
+      - path: backend/presentation/cli/
+        linters:
+          - errcheck
+      - path: _test\.go
+        linters:
+          - errcheck
+          - gosec
+
+formatters:
+  enable:
+    - gofumpt
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - backend/infrastructure/bestpractice/rules

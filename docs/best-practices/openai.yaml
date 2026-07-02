@@ -1,0 +1,45 @@
+profile: openai
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://developers.openai.com/api/docs/guides/prompt-guidance
+    title: GPT-5.5 prompting guide
+  - url: https://developers.openai.com/api/docs/guides/prompt-engineering
+    title: Prompt engineering
+
+output_template: |
+  ## Goal
+  {{goal}}
+
+  ## Context
+  {{context}}
+
+  ## Constraints
+  {{constraints}}
+
+  ## Done when
+  {{done_when}}
+
+rules:
+  - id: openai-outcome-first
+    description: Goal を先頭に移動、手順羅列を Goal + Constraints に分解
+    source_url: https://developers.openai.com/api/docs/guides/prompt-guidance
+    source_section: "Outcome-first prompts"
+    automatable: true
+    pipeline: format
+    stage: ReorderOutcomeFirst
+    action: outcome_first_reorder
+    intake_on_failure: true
+
+  - id: openai-concise
+    description: 過剰な MUST/ONLY を圧縮（真の不変条件は保持）
+    source_url: https://developers.openai.com/api/docs/guides/prompt-guidance
+    source_section: "Shorter, outcome-first prompts"
+    automatable: true
+    pipeline: compress
+    stage: RemoveBoilerplate
+    action: reduce_absolute_language
+    preserve_patterns:
+      - "NEVER"
+      - "must not"
+      - "security"

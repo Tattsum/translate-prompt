@@ -1,0 +1,31 @@
+profile: common
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    title: Claude - Output and formatting (preamble removal)
+
+rules:
+  - id: common-no-preamble
+    description: 定型の前置き・依頼フレーズを除去
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Migration - preamble removal"
+    automatable: true
+    pipeline: compress
+    stage: RemoveBoilerplate
+    patterns:
+      - "以下の通り"
+      - "お願いします"
+      - "Please "
+      - "Here is"
+      - "Based on the above"
+    action: remove_filler
+
+  - id: common-examples
+    description: コードブロック・例示を専用 Section に集約
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Use examples effectively"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: consolidate_examples

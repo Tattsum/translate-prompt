@@ -1,0 +1,50 @@
+profile: claude
+version: "1.0.0"
+last_reviewed: "2026-07-02"
+references:
+  - url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    title: Claude Prompting best practices
+  - url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview
+    title: Claude Prompt engineering overview
+
+output_template: |
+  <task>{{task}}</task>
+  <context>{{context}}</context>
+  <rules>{{rules}}</rules>
+  <examples>{{examples}}</examples>
+  <constraints>{{constraints}}</constraints>
+
+rules:
+  - id: claude-explicit
+    description: 曖昧動詞・依頼口調を命令形に変換
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Be explicit and clear"
+    automatable: true
+    pipeline: format
+    stage: ApplyBestPracticeProfile
+    patterns:
+      - "してほしい"
+      - "改善して"
+      - "なんとかして"
+    action: rewrite_imperative
+    intake_on_failure: true
+
+  - id: claude-xml-structure
+    description: SectionType に応じた XML ラップ
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Structure prompts with XML tags"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: wrap_xml_tags
+
+  - id: claude-long-context
+    description: 複数ドキュメントを document 単位でラップ（20k+ トークン時）
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Long context prompting"
+    automatable: true
+    pipeline: format
+    stage: WrapStructure
+    action: wrap_documents
+    condition:
+      input_tokens_gt: "20000"
