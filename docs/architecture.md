@@ -74,5 +74,16 @@ make dev     # Vite :5173（/query, Connect をプロキシ）
 
 ## セキュリティ
 
-- `127.0.0.1` のみバインド
+- ローカル開発: `127.0.0.1` のみバインド
 - ワークスペース調査の境界制限は従来どおり
+
+## 本番構成（Web 公開）
+
+招待制 β のデプロイ設計は [deployment.md](./deployment.md) を正とする。
+
+| 環境 | SPA | API | 認証 |
+|------|-----|-----|------|
+| ローカル | `make serve`（go:embed）または `make dev`（Vite） | `:8080` | なし |
+| 本番 β | Cloudflare Pages（`prompt.tattsum.com`） | Workers → Tunnel → Fly.io（`api.prompt.tattsum.com`） | Cloudflare Access |
+
+本番では Investigate（サーバー FS 読み取り）は Web から無効。CLI のみ。
