@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { analyze, estimate, optimize } from '../api/client'
 import { useApp } from '../context/AppContext'
+import { Page } from '../components/Layout'
 
 export function InputPage() {
   const { prompt, setPrompt, config, setAnalyzeResult, setOptimizeResult } = useApp()
@@ -22,6 +23,8 @@ export function InputPage() {
     return () => clearTimeout(t)
   }, [prompt, config.tokenizer])
 
+  const overLimit = tokens !== null && tokens > config.max_tokens
+
   async function handleAnalyze() {
     setLoading(true)
     try {
@@ -40,47 +43,38 @@ export function InputPage() {
   }
 
   return (
-    <>
-      <Nav />
-      <main>
-        <h1>プロンプト入力</h1>
-        <div className="card">
+    <Page
+      title="プロンプト入力"
+      description="最適化したいプロンプトを貼り付けて、分析を開始してください。"
+    >
+      <div className="card">
+        <div className="field">
+          <label className="field__label" htmlFor="prompt-input">
+            プロンプト
+          </label>
           <textarea
+            id="prompt-input"
             rows={14}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="最適化するプロンプトを入力..."
           />
           {tokens !== null && (
-            <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>
-              推定トークン: {tokens} / 上限 {config.max_tokens}
-            </p>
+            <span className={`token-badge${overLimit ? ' token-badge--warn' : ''}`}>
+              推定 {tokens.toLocaleString()} トークン / 上限 {config.max_tokens.toLocaleString()}
+            </span>
           )}
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button onClick={handleAnalyze} disabled={loading || !prompt.trim()}>
-              {loading ? '分析中...' : '分析して最適化'}
-            </button>
-            <Link to="/settings">
-              <button type="button" className="secondary">
-                設定
-              </button>
-            </Link>
-          </div>
         </div>
-      </main>
-    </>
+        <div className="btn-row">
+          <button onClick={handleAnalyze} disabled={loading || !prompt.trim()}>
+            {loading && <span className="spinner" aria-hidden="true" />}
+            {loading ? '分析中...' : '分析して最適化'}
+          </button>
+          <Link to="/settings" className="btn secondary">
+            設定
+          </Link>
+        </div>
+      </div>
+    </Page>
   )
 }
-
-function Nav() {
-  return (
-    <nav>
-      <Link to="/">入力</Link>
-      <Link to="/settings">設定</Link>
-      <Link to="/intake">深堀り</Link>
-      <Link to="/result">結果</Link>
-    </nav>
-  )
-}
-
-export { Nav }
