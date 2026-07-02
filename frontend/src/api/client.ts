@@ -13,12 +13,14 @@ import type { AnalyzeResponse, OptimizeConfig, OptimizeResponse, TargetProfile }
 
 export type { TargetProfile, OptimizeConfig, AnalyzeResponse, OptimizeResponse } from './types'
 
+const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
+
 const graphqlClient = createUrqlClient({
-  url: '/query',
+  url: `${apiBase}/query`,
   exchanges: [fetchExchange],
 })
 
-const connectTransport = createConnectTransport({ baseUrl: '/' })
+const connectTransport = createConnectTransport({ baseUrl: apiBase || '/' })
 const connectClient = createPromiseClient(TranslatePromptService, connectTransport)
 
 function toGraphQLProfile(profile: TargetProfile): GqlTargetProfile {
