@@ -92,7 +92,12 @@ frontend/src/pages/*.tsx
 frontend/src/api/*.ts
 ```
 
-## Phase 2 / 3（スコープ外）
+## Phase 2 / 3
 
-- Phase 2: LLM Refiner（automatable: false ルール）、AST 圧縮
-- Phase 3: MCP サーバー `optimize_prompt`
+Phase 1 は完了済み。以降の設計・チェックリストは専用ドキュメントを正とする。
+
+| フェーズ | 内容 | ドキュメント |
+|---------|------|-------------|
+| **App-2** | 共有 LLM 基盤、Intake LLM、Refiner（`automatable: false`）、AST 圧縮（goldmark） | [phase2-app-roadmap.md](./phase2-app-roadmap.md) |
+| **Deploy-2** | 一般公開、Turnstile、Rate Limit、D1 履歴（App-2 とは別スコープ） | [deployment.md](./deployment.md) |
+| **App-3** | MCP サーバー `optimize_prompt` | [phase2-app-roadmap.md](./phase2-app-roadmap.md) §13 |

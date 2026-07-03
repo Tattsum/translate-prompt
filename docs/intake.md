@@ -52,3 +52,35 @@ Analyze → Optimize（十分）→ 完了
 
 - CLI: `--deep-dive`, `--workspace <path>`
 - Web: Settings の深堀り ON/OFF、`/intake` ページ
+
+---
+
+## App-2: LLM 統合（合意）
+
+設計の正: [phase2-app-roadmap.md](./phase2-app-roadmap.md)
+
+### フロー
+
+```
+HeuristicAnalyzer → []Finding（常時）
+    ↓ LLM_ENABLED && deep_dive
+Completer（intake_analyze）→ 追加 []Finding
+    ↓
+MergeFindings → QuestionsFromFindings → AnalyzeResult
+```
+
+### Phase 1 との差分
+
+| 項目 | Phase 1 | App-2 |
+|------|---------|-------|
+| 検出 | `Ambiguity` / キーワード | `Finding`（`Source`: heuristic \| llm） |
+| LLM | なし | ヒューリスティック結果をコンテキストに補完 |
+| 質問生成 | ヒューリスティック直結 | `Finding` 経由（LLM は Question を直接返さない） |
+
+### スイッチ
+
+| 条件 | 動作 |
+|------|------|
+| `LLM_ENABLED=false`（デフォルト） | Phase 1 同等 |
+| `deep_dive=false` | ヒューリスティックのみ |
+| `deep_dive=true` + `LLM_ENABLED=true` | ヒューリスティック + LLM 補完 |
