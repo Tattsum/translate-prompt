@@ -38,7 +38,7 @@ func LoadConfigFromEnv() Config {
 
 	anthropicModel := os.Getenv("LLM_ANTHROPIC_MODEL")
 	if anthropicModel == "" {
-		anthropicModel = "claude-sonnet-4-20250514"
+		anthropicModel = "claude-sonnet-5"
 	}
 
 	return Config{

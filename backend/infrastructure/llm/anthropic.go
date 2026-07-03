@@ -19,7 +19,7 @@ type AnthropicClient struct {
 // NewAnthropicClient creates an Anthropic client.
 func NewAnthropicClient(apiKey, model string) *AnthropicClient {
 	if model == "" {
-		model = "claude-sonnet-4-20250514"
+		model = "claude-sonnet-5"
 	}
 	client := anthropic.NewClient(option.WithAPIKey(apiKey))
 	return &AnthropicClient{
