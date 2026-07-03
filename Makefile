@@ -12,7 +12,7 @@ help: ## Show this help
 install-tools: ## Install golangci-lint v2 and gqlgen CLI
 	@echo "Installing golangci-lint v2..."
 	@$(GO) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
-	@$(GO) install github.com/99designs/gqlgen@v0.17.91
+	@$(GO) install github.com/99designs/gqlgen@v0.17.93
 	@command -v buf >/dev/null 2>&1 || echo "Install buf: https://buf.build/docs/installation"
 	@echo "Done."
 
