@@ -3,7 +3,7 @@ module github.com/Tattsum/translate-prompt
 go 1.26.4
 
 require (
-	connectrpc.com/connect v1.18.1
+	connectrpc.com/connect v1.20.0
 	github.com/99designs/gqlgen v0.17.91
 	github.com/pkoukk/tiktoken-go v0.1.8
 	github.com/vektah/gqlparser/v2 v2.5.34
