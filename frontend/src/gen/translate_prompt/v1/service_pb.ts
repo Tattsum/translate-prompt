@@ -185,6 +185,85 @@ export class Question extends Message<Question> {
 }
 
 /**
+ * @generated from message translate_prompt.v1.Finding
+ */
+export class Finding extends Message<Finding> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string category = 2;
+   */
+  category = "";
+
+  /**
+   * @generated from field: int32 severity = 3;
+   */
+  severity = 0;
+
+  /**
+   * @generated from field: string section_id = 4;
+   */
+  sectionId = "";
+
+  /**
+   * @generated from field: string section_type = 5;
+   */
+  sectionType = "";
+
+  /**
+   * @generated from field: string rule_id = 6;
+   */
+  ruleId = "";
+
+  /**
+   * @generated from field: string summary = 7;
+   */
+  summary = "";
+
+  /**
+   * @generated from field: string source = 8;
+   */
+  source = "";
+
+  constructor(data?: PartialMessage<Finding>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "translate_prompt.v1.Finding";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "category", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "severity", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: "section_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "section_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "rule_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "summary", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "source", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Finding {
+    return new Finding().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Finding {
+    return new Finding().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Finding {
+    return new Finding().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Finding | PlainMessage<Finding> | undefined, b: Finding | PlainMessage<Finding> | undefined): boolean {
+    return proto3.util.equals(Finding, a, b);
+  }
+}
+
+/**
  * @generated from message translate_prompt.v1.AnalyzeRequest
  */
 export class AnalyzeRequest extends Message<AnalyzeRequest> {
@@ -246,6 +325,11 @@ export class AnalyzeResponse extends Message<AnalyzeResponse> {
    */
   prompt = "";
 
+  /**
+   * @generated from field: repeated translate_prompt.v1.Finding findings = 4;
+   */
+  findings: Finding[] = [];
+
   constructor(data?: PartialMessage<AnalyzeResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -257,6 +341,7 @@ export class AnalyzeResponse extends Message<AnalyzeResponse> {
     { no: 1, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "questions", kind: "message", T: Question, repeated: true },
     { no: 3, name: "prompt", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "findings", kind: "message", T: Finding, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnalyzeResponse {
@@ -479,6 +564,16 @@ export class AppliedRule extends Message<AppliedRule> {
    */
   tokensDelta = 0;
 
+  /**
+   * @generated from field: string method = 4;
+   */
+  method = "";
+
+  /**
+   * @generated from field: string model = 5;
+   */
+  model = "";
+
   constructor(data?: PartialMessage<AppliedRule>) {
     super();
     proto3.util.initPartial(data, this);
@@ -490,6 +585,8 @@ export class AppliedRule extends Message<AppliedRule> {
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "source_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "tokens_delta", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: "method", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "model", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AppliedRule {

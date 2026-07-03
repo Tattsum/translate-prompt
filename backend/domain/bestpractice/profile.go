@@ -17,6 +17,18 @@ type Rule struct {
 	IntakeOnFailure  bool     `yaml:"intake_on_failure"`
 	Limits           map[string]int
 	Condition        map[string]string
+	Constraints      map[string]bool
+	LLM              RuleLLM `yaml:"llm"`
+}
+
+// RuleLLM holds per-rule LLM settings from YAML.
+type RuleLLM struct {
+	MaxOutputTokens int `yaml:"max_output_tokens"`
+}
+
+// LLMMaxOutputTokens returns the rule-level output token cap.
+func (r Rule) LLMMaxOutputTokens() int {
+	return r.LLM.MaxOutputTokens
 }
 
 // ProfileDocument is the YAML schema for a target profile.
@@ -69,6 +81,17 @@ func (tp *TargetProfile) RulesForStage(stage string) []Rule {
 	var out []Rule
 	for _, r := range tp.AllRules() {
 		if r.Stage == stage && r.Automatable {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// RulesForRefinement returns non-automatable LLM refiner rules.
+func (tp *TargetProfile) RulesForRefinement() []Rule {
+	var out []Rule
+	for _, r := range tp.AllRules() {
+		if !r.Automatable && r.Stage == "LLMRefiner" {
 			out = append(out, r)
 		}
 	}

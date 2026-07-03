@@ -33,6 +33,17 @@ message Question {
   string rule_id = 3;
 }
 
+message Finding {
+  string id = 1;
+  string category = 2;
+  int32 severity = 3;
+  string section_id = 4;
+  string section_type = 5;
+  string rule_id = 6;
+  string summary = 7;
+  string source = 8;
+}
+
 message AnalyzeRequest {
   string prompt = 1;
   OptimizeConfig config = 2;
@@ -42,6 +53,7 @@ message AnalyzeResponse {
   string status = 1;
   repeated Question questions = 2;
   string prompt = 3;
+  repeated Finding findings = 4;
 }
 
 message InvestigateRequest {
@@ -70,6 +82,8 @@ message AppliedRule {
   string id = 1;
   string source_url = 2;
   int32 tokens_delta = 3;
+  string method = 4;
+  string model = 5;
 }
 
 message OptimizeReport {

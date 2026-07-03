@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Tattsum/translate-prompt/backend/domain/budget"
+	"github.com/Tattsum/translate-prompt/backend/domain/llm"
 	"github.com/Tattsum/translate-prompt/backend/domain/optimizer"
 	"github.com/Tattsum/translate-prompt/backend/domain/prompt"
 	infraBP "github.com/Tattsum/translate-prompt/backend/infrastructure/bestpractice"
@@ -26,8 +27,9 @@ type Result struct {
 
 // UseCase orchestrates Format → Compress pipelines.
 type UseCase struct {
-	Loader  *infraBP.Loader
-	Counter optimizer.TokenCounter
+	Loader    *infraBP.Loader
+	Counter   optimizer.TokenCounter
+	Completer llm.Completer
 }
 
 // NewUseCase creates an optimize use case with tokenizer.
@@ -37,6 +39,12 @@ func NewUseCase(loader *infraBP.Loader, encoding string) (*UseCase, error) {
 		return nil, err
 	}
 	return &UseCase{Loader: loader, Counter: tok}, nil
+}
+
+// WithCompleter attaches an LLM completer for refinement stages.
+func (uc *UseCase) WithCompleter(c llm.Completer) *UseCase {
+	uc.Completer = c
+	return uc
 }
 
 // Optimize runs format then compress pipelines.
@@ -50,6 +58,7 @@ func (uc *UseCase) Optimize(ctx context.Context, raw string, cfg budget.Config) 
 	}
 
 	p := prompt.New(raw)
+	llm.ResetBudgetIfSupported(uc.Completer)
 
 	formatPL := &optimizer.Pipeline{
 		Name:    "Format",
@@ -96,6 +105,8 @@ func (uc *UseCase) buildCompressPipeline(cfg budget.Config) (*optimizer.Pipeline
 	var stageList []optimizer.Stage
 	stageList = append(stageList,
 		stages.NormalizeWhitespace{},
+		stages.ASTParseStage{},
+		stages.ASTCompressStage{},
 		stages.DeduplicateExact{},
 	)
 
@@ -120,6 +131,12 @@ func (uc *UseCase) buildCompressPipeline(cfg budget.Config) (*optimizer.Pipeline
 			})
 		}
 	}
+
+	stageList = append(stageList, stages.LLMRefinerStage{
+		Completer: uc.Completer,
+		Loader:    uc.Loader,
+		Counter:   uc.Counter,
+	})
 
 	stageList = append(stageList,
 		stages.BudgetAllocate{Counter: uc.Counter},

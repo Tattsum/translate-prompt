@@ -12,6 +12,12 @@ type Server struct {
 	Port               int
 	AllowedOrigins     []string
 	InvestigateEnabled bool
+	LLM                LLM
+}
+
+// LLM holds LLM-related server configuration.
+type LLM struct {
+	Enabled bool
 }
 
 // LoadServerFromEnv reads server configuration. Defaults preserve local development behavior.
@@ -38,11 +44,14 @@ func LoadServerFromEnv(defaultPort int) Server {
 		investigateEnabled = strings.EqualFold(v, "true") || v == "1"
 	}
 
+	llmEnabled := strings.EqualFold(os.Getenv("LLM_ENABLED"), "true") || os.Getenv("LLM_ENABLED") == "1"
+
 	return Server{
 		ListenHost:         listenHost,
 		Port:               port,
 		AllowedOrigins:     allowedOrigins,
 		InvestigateEnabled: investigateEnabled,
+		LLM:                LLM{Enabled: llmEnabled},
 	}
 }
 

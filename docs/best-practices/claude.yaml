@@ -48,3 +48,19 @@ rules:
     action: wrap_documents
     condition:
       input_tokens_gt: "20000"
+
+  - id: claude-explicit-semantic
+    description: 依頼口調・曖昧動詞の命令形化（残差）
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Be explicit and clear"
+    automatable: false
+    pipeline: compress
+    stage: LLMRefiner
+    action: rewrite_imperative_semantic
+    condition:
+      section_type: Task
+    constraints:
+      must_not_increase_tokens: true
+    intake_on_failure: false
+    llm:
+      max_output_tokens: 1024

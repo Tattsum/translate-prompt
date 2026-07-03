@@ -29,3 +29,20 @@ rules:
     pipeline: format
     stage: WrapStructure
     action: consolidate_examples
+
+  - id: common-example-summarize
+    description: examples Section の意味保持要約
+    source_url: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+    source_section: "Use examples effectively"
+    automatable: false
+    pipeline: compress
+    stage: LLMRefiner
+    action: summarize_preserve_meaning
+    condition:
+      section_tag: examples
+      remaining_tokens_over_budget: "true"
+    constraints:
+      must_not_increase_tokens: true
+    intake_on_failure: false
+    llm:
+      max_output_tokens: 1024

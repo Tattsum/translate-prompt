@@ -13,6 +13,8 @@ type AppliedRule struct {
 	SourceURL   string `json:"source_url"`
 	TokensDelta int    `json:"tokens_delta"`
 	Description string `json:"description,omitempty"`
+	Method      string `json:"method,omitempty"`
+	Model       string `json:"model,omitempty"`
 }
 
 // StageResult captures per-stage metrics.

@@ -18,16 +18,30 @@ type AnalyzeResult struct {
 	Status    AnalyzeStatus `json:"status"`
 	Questions []*Question   `json:"questions,omitempty"`
 	Prompt    *string       `json:"prompt,omitempty"`
+	Findings  []*Finding    `json:"findings,omitempty"`
 }
 
 type AppliedRule struct {
-	ID          string `json:"id"`
-	SourceURL   string `json:"sourceUrl"`
-	TokensDelta *int   `json:"tokensDelta,omitempty"`
+	ID          string  `json:"id"`
+	SourceURL   string  `json:"sourceUrl"`
+	TokensDelta *int    `json:"tokensDelta,omitempty"`
+	Method      *string `json:"method,omitempty"`
+	Model       *string `json:"model,omitempty"`
 }
 
 type EstimateResult struct {
 	Tokens int `json:"tokens"`
+}
+
+type Finding struct {
+	ID          string        `json:"id"`
+	Category    string        `json:"category"`
+	Severity    int           `json:"severity"`
+	SectionID   *string       `json:"sectionId,omitempty"`
+	SectionType *string       `json:"sectionType,omitempty"`
+	RuleID      *string       `json:"ruleId,omitempty"`
+	Summary     string        `json:"summary"`
+	Source      FindingSource `json:"source"`
 }
 
 type Health struct {
@@ -150,6 +164,61 @@ func (e *AnalyzeStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (e AnalyzeStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type FindingSource string
+
+const (
+	FindingSourceHeuristic FindingSource = "HEURISTIC"
+	FindingSourceLlm       FindingSource = "LLM"
+)
+
+var AllFindingSource = []FindingSource{
+	FindingSourceHeuristic,
+	FindingSourceLlm,
+}
+
+func (e FindingSource) IsValid() bool {
+	switch e {
+	case FindingSourceHeuristic, FindingSourceLlm:
+		return true
+	}
+	return false
+}
+
+func (e FindingSource) String() string {
+	return string(e)
+}
+
+func (e *FindingSource) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = FindingSource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid FindingSource", str)
+	}
+	return nil
+}
+
+func (e FindingSource) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *FindingSource) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e FindingSource) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

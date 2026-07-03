@@ -44,14 +44,38 @@ type Config struct {
 	WorkspacePath        string
 	VerificationCommands []string
 	OutputMode           string // e.g. "session_brief" for Devin
+	LLMEnabled           bool
+	LLMMaxCalls          int
+	LLMModelGemini       string
+	LLMModelAnthropic    string
+}
+
+// EnrichLLMDefaults merges server-side LLM defaults into a request config.
+func EnrichLLMDefaults(cfg, defaults Config) Config {
+	if defaults.LLMEnabled {
+		cfg.LLMEnabled = true
+	}
+	if cfg.LLMMaxCalls == 0 && defaults.LLMMaxCalls > 0 {
+		cfg.LLMMaxCalls = defaults.LLMMaxCalls
+	}
+	if cfg.LLMModelGemini == "" && defaults.LLMModelGemini != "" {
+		cfg.LLMModelGemini = defaults.LLMModelGemini
+	}
+	if cfg.LLMModelAnthropic == "" && defaults.LLMModelAnthropic != "" {
+		cfg.LLMModelAnthropic = defaults.LLMModelAnthropic
+	}
+	return cfg
 }
 
 // DefaultConfig returns sensible defaults.
 func DefaultConfig() Config {
 	return Config{
-		MaxTokens:     8000,
-		TargetProfile: ProfileCodex,
-		Tokenizer:     "cl100k_base",
+		MaxTokens:         8000,
+		TargetProfile:     ProfileCodex,
+		Tokenizer:         "cl100k_base",
+		LLMMaxCalls:       3,
+		LLMModelGemini:    "gemini-2.5-flash",
+		LLMModelAnthropic: "claude-sonnet-4-20250514",
 	}
 }
 

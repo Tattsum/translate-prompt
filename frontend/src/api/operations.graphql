@@ -7,6 +7,16 @@ mutation Analyze($input: AnalyzeInput!) {
       text
       ruleId
     }
+    findings {
+      id
+      category
+      severity
+      sectionId
+      sectionType
+      ruleId
+      summary
+      source
+    }
   }
 }
 
@@ -39,6 +49,8 @@ mutation Optimize($input: OptimizeInput!) {
         id
         sourceUrl
         tokensDelta
+        method
+        model
       }
       truncatedSections
     }

@@ -237,6 +237,106 @@ func (x *Question) GetRuleId() string {
 	return ""
 }
 
+type Finding struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Category      string                 `protobuf:"bytes,2,opt,name=category,proto3" json:"category,omitempty"`
+	Severity      int32                  `protobuf:"varint,3,opt,name=severity,proto3" json:"severity,omitempty"`
+	SectionId     string                 `protobuf:"bytes,4,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
+	SectionType   string                 `protobuf:"bytes,5,opt,name=section_type,json=sectionType,proto3" json:"section_type,omitempty"`
+	RuleId        string                 `protobuf:"bytes,6,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`
+	Summary       string                 `protobuf:"bytes,7,opt,name=summary,proto3" json:"summary,omitempty"`
+	Source        string                 `protobuf:"bytes,8,opt,name=source,proto3" json:"source,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Finding) Reset() {
+	*x = Finding{}
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Finding) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Finding) ProtoMessage() {}
+
+func (x *Finding) ProtoReflect() protoreflect.Message {
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Finding.ProtoReflect.Descriptor instead.
+func (*Finding) Descriptor() ([]byte, []int) {
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Finding) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Finding) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *Finding) GetSeverity() int32 {
+	if x != nil {
+		return x.Severity
+	}
+	return 0
+}
+
+func (x *Finding) GetSectionId() string {
+	if x != nil {
+		return x.SectionId
+	}
+	return ""
+}
+
+func (x *Finding) GetSectionType() string {
+	if x != nil {
+		return x.SectionType
+	}
+	return ""
+}
+
+func (x *Finding) GetRuleId() string {
+	if x != nil {
+		return x.RuleId
+	}
+	return ""
+}
+
+func (x *Finding) GetSummary() string {
+	if x != nil {
+		return x.Summary
+	}
+	return ""
+}
+
+func (x *Finding) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
 type AnalyzeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Prompt        string                 `protobuf:"bytes,1,opt,name=prompt,proto3" json:"prompt,omitempty"`
@@ -247,7 +347,7 @@ type AnalyzeRequest struct {
 
 func (x *AnalyzeRequest) Reset() {
 	*x = AnalyzeRequest{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[4]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -259,7 +359,7 @@ func (x *AnalyzeRequest) String() string {
 func (*AnalyzeRequest) ProtoMessage() {}
 
 func (x *AnalyzeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[4]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -272,7 +372,7 @@ func (x *AnalyzeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnalyzeRequest.ProtoReflect.Descriptor instead.
 func (*AnalyzeRequest) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{4}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AnalyzeRequest) GetPrompt() string {
@@ -294,13 +394,14 @@ type AnalyzeResponse struct {
 	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	Questions     []*Question            `protobuf:"bytes,2,rep,name=questions,proto3" json:"questions,omitempty"`
 	Prompt        string                 `protobuf:"bytes,3,opt,name=prompt,proto3" json:"prompt,omitempty"`
+	Findings      []*Finding             `protobuf:"bytes,4,rep,name=findings,proto3" json:"findings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AnalyzeResponse) Reset() {
 	*x = AnalyzeResponse{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[5]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -312,7 +413,7 @@ func (x *AnalyzeResponse) String() string {
 func (*AnalyzeResponse) ProtoMessage() {}
 
 func (x *AnalyzeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[5]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -325,7 +426,7 @@ func (x *AnalyzeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnalyzeResponse.ProtoReflect.Descriptor instead.
 func (*AnalyzeResponse) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{5}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AnalyzeResponse) GetStatus() string {
@@ -349,6 +450,13 @@ func (x *AnalyzeResponse) GetPrompt() string {
 	return ""
 }
 
+func (x *AnalyzeResponse) GetFindings() []*Finding {
+	if x != nil {
+		return x.Findings
+	}
+	return nil
+}
+
 type InvestigateRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	WorkspacePath string                 `protobuf:"bytes,1,opt,name=workspace_path,json=workspacePath,proto3" json:"workspace_path,omitempty"`
@@ -359,7 +467,7 @@ type InvestigateRequest struct {
 
 func (x *InvestigateRequest) Reset() {
 	*x = InvestigateRequest{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[6]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -371,7 +479,7 @@ func (x *InvestigateRequest) String() string {
 func (*InvestigateRequest) ProtoMessage() {}
 
 func (x *InvestigateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[6]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -384,7 +492,7 @@ func (x *InvestigateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvestigateRequest.ProtoReflect.Descriptor instead.
 func (*InvestigateRequest) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{6}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *InvestigateRequest) GetWorkspacePath() string {
@@ -412,7 +520,7 @@ type InvestigationFile struct {
 
 func (x *InvestigationFile) Reset() {
 	*x = InvestigationFile{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[7]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -424,7 +532,7 @@ func (x *InvestigationFile) String() string {
 func (*InvestigationFile) ProtoMessage() {}
 
 func (x *InvestigationFile) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[7]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -437,7 +545,7 @@ func (x *InvestigationFile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvestigationFile.ProtoReflect.Descriptor instead.
 func (*InvestigationFile) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{7}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *InvestigationFile) GetPath() string {
@@ -471,7 +579,7 @@ type InvestigateResponse struct {
 
 func (x *InvestigateResponse) Reset() {
 	*x = InvestigateResponse{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[8]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -483,7 +591,7 @@ func (x *InvestigateResponse) String() string {
 func (*InvestigateResponse) ProtoMessage() {}
 
 func (x *InvestigateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[8]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -496,7 +604,7 @@ func (x *InvestigateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InvestigateResponse.ProtoReflect.Descriptor instead.
 func (*InvestigateResponse) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{8}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *InvestigateResponse) GetFiles() []*InvestigationFile {
@@ -524,7 +632,7 @@ type OptimizeRequest struct {
 
 func (x *OptimizeRequest) Reset() {
 	*x = OptimizeRequest{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[9]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -536,7 +644,7 @@ func (x *OptimizeRequest) String() string {
 func (*OptimizeRequest) ProtoMessage() {}
 
 func (x *OptimizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[9]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -549,7 +657,7 @@ func (x *OptimizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OptimizeRequest.ProtoReflect.Descriptor instead.
 func (*OptimizeRequest) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{9}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *OptimizeRequest) GetPrompt() string {
@@ -578,13 +686,15 @@ type AppliedRule struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	SourceUrl     string                 `protobuf:"bytes,2,opt,name=source_url,json=sourceUrl,proto3" json:"source_url,omitempty"`
 	TokensDelta   int32                  `protobuf:"varint,3,opt,name=tokens_delta,json=tokensDelta,proto3" json:"tokens_delta,omitempty"`
+	Method        string                 `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
+	Model         string                 `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AppliedRule) Reset() {
 	*x = AppliedRule{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[10]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -596,7 +706,7 @@ func (x *AppliedRule) String() string {
 func (*AppliedRule) ProtoMessage() {}
 
 func (x *AppliedRule) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[10]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -609,7 +719,7 @@ func (x *AppliedRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AppliedRule.ProtoReflect.Descriptor instead.
 func (*AppliedRule) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{10}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *AppliedRule) GetId() string {
@@ -633,6 +743,20 @@ func (x *AppliedRule) GetTokensDelta() int32 {
 	return 0
 }
 
+func (x *AppliedRule) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *AppliedRule) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
 type OptimizeReport struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	InputTokens       int32                  `protobuf:"varint,1,opt,name=input_tokens,json=inputTokens,proto3" json:"input_tokens,omitempty"`
@@ -647,7 +771,7 @@ type OptimizeReport struct {
 
 func (x *OptimizeReport) Reset() {
 	*x = OptimizeReport{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[11]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -659,7 +783,7 @@ func (x *OptimizeReport) String() string {
 func (*OptimizeReport) ProtoMessage() {}
 
 func (x *OptimizeReport) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[11]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -672,7 +796,7 @@ func (x *OptimizeReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OptimizeReport.ProtoReflect.Descriptor instead.
 func (*OptimizeReport) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{11}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *OptimizeReport) GetInputTokens() int32 {
@@ -727,7 +851,7 @@ type MdcSuggestion struct {
 
 func (x *MdcSuggestion) Reset() {
 	*x = MdcSuggestion{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[12]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -739,7 +863,7 @@ func (x *MdcSuggestion) String() string {
 func (*MdcSuggestion) ProtoMessage() {}
 
 func (x *MdcSuggestion) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[12]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -752,7 +876,7 @@ func (x *MdcSuggestion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MdcSuggestion.ProtoReflect.Descriptor instead.
 func (*MdcSuggestion) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{12}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *MdcSuggestion) GetFilename() string {
@@ -778,7 +902,7 @@ type OptimizeArtifacts struct {
 
 func (x *OptimizeArtifacts) Reset() {
 	*x = OptimizeArtifacts{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[13]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -790,7 +914,7 @@ func (x *OptimizeArtifacts) String() string {
 func (*OptimizeArtifacts) ProtoMessage() {}
 
 func (x *OptimizeArtifacts) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[13]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -803,7 +927,7 @@ func (x *OptimizeArtifacts) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OptimizeArtifacts.ProtoReflect.Descriptor instead.
 func (*OptimizeArtifacts) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{13}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *OptimizeArtifacts) GetCursorMdcSuggestions() []*MdcSuggestion {
@@ -824,7 +948,7 @@ type OptimizeResponse struct {
 
 func (x *OptimizeResponse) Reset() {
 	*x = OptimizeResponse{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[14]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -836,7 +960,7 @@ func (x *OptimizeResponse) String() string {
 func (*OptimizeResponse) ProtoMessage() {}
 
 func (x *OptimizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[14]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -849,7 +973,7 @@ func (x *OptimizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OptimizeResponse.ProtoReflect.Descriptor instead.
 func (*OptimizeResponse) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{14}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *OptimizeResponse) GetOptimizedPrompt() string {
@@ -883,7 +1007,7 @@ type EstimateRequest struct {
 
 func (x *EstimateRequest) Reset() {
 	*x = EstimateRequest{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[15]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -895,7 +1019,7 @@ func (x *EstimateRequest) String() string {
 func (*EstimateRequest) ProtoMessage() {}
 
 func (x *EstimateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[15]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -908,7 +1032,7 @@ func (x *EstimateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EstimateRequest.ProtoReflect.Descriptor instead.
 func (*EstimateRequest) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{15}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EstimateRequest) GetText() string {
@@ -934,7 +1058,7 @@ type EstimateResponse struct {
 
 func (x *EstimateResponse) Reset() {
 	*x = EstimateResponse{}
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[16]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -946,7 +1070,7 @@ func (x *EstimateResponse) String() string {
 func (*EstimateResponse) ProtoMessage() {}
 
 func (x *EstimateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_translate_prompt_v1_service_proto_msgTypes[16]
+	mi := &file_translate_prompt_v1_service_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -959,7 +1083,7 @@ func (x *EstimateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EstimateResponse.ProtoReflect.Descriptor instead.
 func (*EstimateResponse) Descriptor() ([]byte, []int) {
-	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{16}
+	return file_translate_prompt_v1_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EstimateResponse) GetTokens() int32 {
@@ -987,14 +1111,25 @@ const file_translate_prompt_v1_service_proto_rawDesc = "" +
 	"\bQuestion\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04text\x18\x02 \x01(\tR\x04text\x12\x17\n" +
-	"\arule_id\x18\x03 \x01(\tR\x06ruleId\"e\n" +
+	"\arule_id\x18\x03 \x01(\tR\x06ruleId\"\xde\x01\n" +
+	"\aFinding\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\bcategory\x18\x02 \x01(\tR\bcategory\x12\x1a\n" +
+	"\bseverity\x18\x03 \x01(\x05R\bseverity\x12\x1d\n" +
+	"\n" +
+	"section_id\x18\x04 \x01(\tR\tsectionId\x12!\n" +
+	"\fsection_type\x18\x05 \x01(\tR\vsectionType\x12\x17\n" +
+	"\arule_id\x18\x06 \x01(\tR\x06ruleId\x12\x18\n" +
+	"\asummary\x18\a \x01(\tR\asummary\x12\x16\n" +
+	"\x06source\x18\b \x01(\tR\x06source\"e\n" +
 	"\x0eAnalyzeRequest\x12\x16\n" +
 	"\x06prompt\x18\x01 \x01(\tR\x06prompt\x12;\n" +
-	"\x06config\x18\x02 \x01(\v2#.translate_prompt.v1.OptimizeConfigR\x06config\"~\n" +
+	"\x06config\x18\x02 \x01(\v2#.translate_prompt.v1.OptimizeConfigR\x06config\"\xb8\x01\n" +
 	"\x0fAnalyzeResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12;\n" +
 	"\tquestions\x18\x02 \x03(\v2\x1d.translate_prompt.v1.QuestionR\tquestions\x12\x16\n" +
-	"\x06prompt\x18\x03 \x01(\tR\x06prompt\"b\n" +
+	"\x06prompt\x18\x03 \x01(\tR\x06prompt\x128\n" +
+	"\bfindings\x18\x04 \x03(\v2\x1c.translate_prompt.v1.FindingR\bfindings\"b\n" +
 	"\x12InvestigateRequest\x12%\n" +
 	"\x0eworkspace_path\x18\x01 \x01(\tR\rworkspacePath\x12%\n" +
 	"\x0etarget_profile\x18\x02 \x01(\tR\rtargetProfile\"s\n" +
@@ -1011,12 +1146,14 @@ const file_translate_prompt_v1_service_proto_rawDesc = "" +
 	"\aanswers\x18\x03 \x03(\v21.translate_prompt.v1.OptimizeRequest.AnswersEntryR\aanswers\x1a:\n" +
 	"\fAnswersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"_\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x8d\x01\n" +
 	"\vAppliedRule\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"source_url\x18\x02 \x01(\tR\tsourceUrl\x12!\n" +
-	"\ftokens_delta\x18\x03 \x01(\x05R\vtokensDelta\"\xa2\x02\n" +
+	"\ftokens_delta\x18\x03 \x01(\x05R\vtokensDelta\x12\x16\n" +
+	"\x06method\x18\x04 \x01(\tR\x06method\x12\x14\n" +
+	"\x05model\x18\x05 \x01(\tR\x05model\"\xa2\x02\n" +
 	"\x0eOptimizeReport\x12!\n" +
 	"\finput_tokens\x18\x01 \x01(\x05R\vinputTokens\x12#\n" +
 	"\routput_tokens\x18\x02 \x01(\x05R\foutputTokens\x12+\n" +
@@ -1058,52 +1195,54 @@ func file_translate_prompt_v1_service_proto_rawDescGZIP() []byte {
 	return file_translate_prompt_v1_service_proto_rawDescData
 }
 
-var file_translate_prompt_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_translate_prompt_v1_service_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_translate_prompt_v1_service_proto_goTypes = []any{
 	(*HealthRequest)(nil),       // 0: translate_prompt.v1.HealthRequest
 	(*HealthResponse)(nil),      // 1: translate_prompt.v1.HealthResponse
 	(*OptimizeConfig)(nil),      // 2: translate_prompt.v1.OptimizeConfig
 	(*Question)(nil),            // 3: translate_prompt.v1.Question
-	(*AnalyzeRequest)(nil),      // 4: translate_prompt.v1.AnalyzeRequest
-	(*AnalyzeResponse)(nil),     // 5: translate_prompt.v1.AnalyzeResponse
-	(*InvestigateRequest)(nil),  // 6: translate_prompt.v1.InvestigateRequest
-	(*InvestigationFile)(nil),   // 7: translate_prompt.v1.InvestigationFile
-	(*InvestigateResponse)(nil), // 8: translate_prompt.v1.InvestigateResponse
-	(*OptimizeRequest)(nil),     // 9: translate_prompt.v1.OptimizeRequest
-	(*AppliedRule)(nil),         // 10: translate_prompt.v1.AppliedRule
-	(*OptimizeReport)(nil),      // 11: translate_prompt.v1.OptimizeReport
-	(*MdcSuggestion)(nil),       // 12: translate_prompt.v1.MdcSuggestion
-	(*OptimizeArtifacts)(nil),   // 13: translate_prompt.v1.OptimizeArtifacts
-	(*OptimizeResponse)(nil),    // 14: translate_prompt.v1.OptimizeResponse
-	(*EstimateRequest)(nil),     // 15: translate_prompt.v1.EstimateRequest
-	(*EstimateResponse)(nil),    // 16: translate_prompt.v1.EstimateResponse
-	nil,                         // 17: translate_prompt.v1.OptimizeRequest.AnswersEntry
+	(*Finding)(nil),             // 4: translate_prompt.v1.Finding
+	(*AnalyzeRequest)(nil),      // 5: translate_prompt.v1.AnalyzeRequest
+	(*AnalyzeResponse)(nil),     // 6: translate_prompt.v1.AnalyzeResponse
+	(*InvestigateRequest)(nil),  // 7: translate_prompt.v1.InvestigateRequest
+	(*InvestigationFile)(nil),   // 8: translate_prompt.v1.InvestigationFile
+	(*InvestigateResponse)(nil), // 9: translate_prompt.v1.InvestigateResponse
+	(*OptimizeRequest)(nil),     // 10: translate_prompt.v1.OptimizeRequest
+	(*AppliedRule)(nil),         // 11: translate_prompt.v1.AppliedRule
+	(*OptimizeReport)(nil),      // 12: translate_prompt.v1.OptimizeReport
+	(*MdcSuggestion)(nil),       // 13: translate_prompt.v1.MdcSuggestion
+	(*OptimizeArtifacts)(nil),   // 14: translate_prompt.v1.OptimizeArtifacts
+	(*OptimizeResponse)(nil),    // 15: translate_prompt.v1.OptimizeResponse
+	(*EstimateRequest)(nil),     // 16: translate_prompt.v1.EstimateRequest
+	(*EstimateResponse)(nil),    // 17: translate_prompt.v1.EstimateResponse
+	nil,                         // 18: translate_prompt.v1.OptimizeRequest.AnswersEntry
 }
 var file_translate_prompt_v1_service_proto_depIdxs = []int32{
 	2,  // 0: translate_prompt.v1.AnalyzeRequest.config:type_name -> translate_prompt.v1.OptimizeConfig
 	3,  // 1: translate_prompt.v1.AnalyzeResponse.questions:type_name -> translate_prompt.v1.Question
-	7,  // 2: translate_prompt.v1.InvestigateResponse.files:type_name -> translate_prompt.v1.InvestigationFile
-	2,  // 3: translate_prompt.v1.OptimizeRequest.config:type_name -> translate_prompt.v1.OptimizeConfig
-	17, // 4: translate_prompt.v1.OptimizeRequest.answers:type_name -> translate_prompt.v1.OptimizeRequest.AnswersEntry
-	10, // 5: translate_prompt.v1.OptimizeReport.applied_rules:type_name -> translate_prompt.v1.AppliedRule
-	12, // 6: translate_prompt.v1.OptimizeArtifacts.cursor_mdc_suggestions:type_name -> translate_prompt.v1.MdcSuggestion
-	13, // 7: translate_prompt.v1.OptimizeResponse.artifacts:type_name -> translate_prompt.v1.OptimizeArtifacts
-	11, // 8: translate_prompt.v1.OptimizeResponse.report:type_name -> translate_prompt.v1.OptimizeReport
-	0,  // 9: translate_prompt.v1.TranslatePromptService.Health:input_type -> translate_prompt.v1.HealthRequest
-	4,  // 10: translate_prompt.v1.TranslatePromptService.Analyze:input_type -> translate_prompt.v1.AnalyzeRequest
-	6,  // 11: translate_prompt.v1.TranslatePromptService.Investigate:input_type -> translate_prompt.v1.InvestigateRequest
-	9,  // 12: translate_prompt.v1.TranslatePromptService.Optimize:input_type -> translate_prompt.v1.OptimizeRequest
-	15, // 13: translate_prompt.v1.TranslatePromptService.Estimate:input_type -> translate_prompt.v1.EstimateRequest
-	1,  // 14: translate_prompt.v1.TranslatePromptService.Health:output_type -> translate_prompt.v1.HealthResponse
-	5,  // 15: translate_prompt.v1.TranslatePromptService.Analyze:output_type -> translate_prompt.v1.AnalyzeResponse
-	8,  // 16: translate_prompt.v1.TranslatePromptService.Investigate:output_type -> translate_prompt.v1.InvestigateResponse
-	14, // 17: translate_prompt.v1.TranslatePromptService.Optimize:output_type -> translate_prompt.v1.OptimizeResponse
-	16, // 18: translate_prompt.v1.TranslatePromptService.Estimate:output_type -> translate_prompt.v1.EstimateResponse
-	14, // [14:19] is the sub-list for method output_type
-	9,  // [9:14] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	4,  // 2: translate_prompt.v1.AnalyzeResponse.findings:type_name -> translate_prompt.v1.Finding
+	8,  // 3: translate_prompt.v1.InvestigateResponse.files:type_name -> translate_prompt.v1.InvestigationFile
+	2,  // 4: translate_prompt.v1.OptimizeRequest.config:type_name -> translate_prompt.v1.OptimizeConfig
+	18, // 5: translate_prompt.v1.OptimizeRequest.answers:type_name -> translate_prompt.v1.OptimizeRequest.AnswersEntry
+	11, // 6: translate_prompt.v1.OptimizeReport.applied_rules:type_name -> translate_prompt.v1.AppliedRule
+	13, // 7: translate_prompt.v1.OptimizeArtifacts.cursor_mdc_suggestions:type_name -> translate_prompt.v1.MdcSuggestion
+	14, // 8: translate_prompt.v1.OptimizeResponse.artifacts:type_name -> translate_prompt.v1.OptimizeArtifacts
+	12, // 9: translate_prompt.v1.OptimizeResponse.report:type_name -> translate_prompt.v1.OptimizeReport
+	0,  // 10: translate_prompt.v1.TranslatePromptService.Health:input_type -> translate_prompt.v1.HealthRequest
+	5,  // 11: translate_prompt.v1.TranslatePromptService.Analyze:input_type -> translate_prompt.v1.AnalyzeRequest
+	7,  // 12: translate_prompt.v1.TranslatePromptService.Investigate:input_type -> translate_prompt.v1.InvestigateRequest
+	10, // 13: translate_prompt.v1.TranslatePromptService.Optimize:input_type -> translate_prompt.v1.OptimizeRequest
+	16, // 14: translate_prompt.v1.TranslatePromptService.Estimate:input_type -> translate_prompt.v1.EstimateRequest
+	1,  // 15: translate_prompt.v1.TranslatePromptService.Health:output_type -> translate_prompt.v1.HealthResponse
+	6,  // 16: translate_prompt.v1.TranslatePromptService.Analyze:output_type -> translate_prompt.v1.AnalyzeResponse
+	9,  // 17: translate_prompt.v1.TranslatePromptService.Investigate:output_type -> translate_prompt.v1.InvestigateResponse
+	15, // 18: translate_prompt.v1.TranslatePromptService.Optimize:output_type -> translate_prompt.v1.OptimizeResponse
+	17, // 19: translate_prompt.v1.TranslatePromptService.Estimate:output_type -> translate_prompt.v1.EstimateResponse
+	15, // [15:20] is the sub-list for method output_type
+	10, // [10:15] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_translate_prompt_v1_service_proto_init() }
@@ -1117,7 +1256,7 @@ func file_translate_prompt_v1_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_translate_prompt_v1_service_proto_rawDesc), len(file_translate_prompt_v1_service_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

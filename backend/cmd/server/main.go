@@ -18,9 +18,11 @@ import (
 
 	appintake "github.com/Tattsum/translate-prompt/backend/application/intake"
 	"github.com/Tattsum/translate-prompt/backend/application/optimize"
+	"github.com/Tattsum/translate-prompt/backend/domain/budget"
 	"github.com/Tattsum/translate-prompt/backend/graph"
 	infraBP "github.com/Tattsum/translate-prompt/backend/infrastructure/bestpractice"
 	"github.com/Tattsum/translate-prompt/backend/infrastructure/config"
+	infrallm "github.com/Tattsum/translate-prompt/backend/infrastructure/llm"
 	"github.com/Tattsum/translate-prompt/backend/presentation/connectrpc"
 )
 
@@ -35,21 +37,26 @@ func main() {
 	flag.Parse()
 
 	cfg := config.LoadServerFromEnv(*port)
+	llmCfg := infrallm.LoadConfigFromEnv()
+	llmCfg.Enabled = llmCfg.Enabled || cfg.LLM.Enabled
 
 	loader, err := infraBP.NewLoader()
 	if err != nil {
 		log.Fatalf("load rules: %v", err)
 	}
 
+	llmService := infrallm.NewService(llmCfg)
+
 	optUC, err := optimize.NewUseCase(loader, "cl100k_base")
 	if err != nil {
 		log.Fatalf("optimizer: %v", err)
 	}
-	intakeUC := appintake.NewUseCase(loader)
+	optUC.WithCompleter(llmService)
+	intakeUC := appintake.NewUseCase(loader).WithCompleter(llmService)
 
 	mux := http.NewServeMux()
 
-	gqlResolver := graph.NewResolver(optUC, intakeUC, cfg.InvestigateEnabled)
+	gqlResolver := graph.NewResolver(optUC, intakeUC, cfg.InvestigateEnabled, llmBudgetDefaults(llmCfg))
 	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: gqlResolver}))
 	mux.Handle(graphQLEndpoint, gqlServer)
 
@@ -57,7 +64,7 @@ func main() {
 		mux.Handle(playgroundEndpoint, playground.Handler("translate-prompt", graphQLEndpoint))
 	}
 
-	connectrpc.Mount(mux, connectrpc.NewService(optUC, intakeUC, cfg.InvestigateEnabled))
+	connectrpc.Mount(mux, connectrpc.NewService(optUC, intakeUC, cfg.InvestigateEnabled, llmBudgetDefaults(llmCfg)))
 	registerSPA(mux)
 
 	addr := fmt.Sprintf("%s:%d", cfg.ListenHost, cfg.Port)
@@ -81,6 +88,12 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}
+}
+
+func llmBudgetDefaults(cfg infrallm.Config) budget.Config {
+	out := budget.DefaultConfig()
+	cfg.ApplyToBudgetConfig(&out)
+	return out
 }
 
 func corsMiddleware(allowedOrigins []string, next http.Handler) http.Handler {

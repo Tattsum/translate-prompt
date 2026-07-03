@@ -558,20 +558,20 @@ infrastructure/llm/
 
 ### 9.2 統合
 
-| 対象 | 方針 |
-|------|------|
-| `Optimize` with LLM | noop または VCR 録画リプレイ |
-| `Analyze` with LLM | ヒューリスティック only / LLM 補完の両 fixture |
-| CI | **LLM API を叩かない**（デフォルト）。手動または nightly で実 API |
+| 対象 | 方針 | 実装 |
+|------|------|------|
+| `Optimize` with LLM | noop または VCR 録画リプレイ | `application/optimize/integration_test.go` |
+| `Analyze` with LLM | ヒューリスティック only / LLM 補完の両 fixture | `application/intake/integration_test.go` |
+| CI | **LLM API を叩かない**（デフォルト）。手動または nightly で実 API | noop Completer のみ |
 
 ### 9.3 成功基準（App-2）
 
-- [ ] `LLM_ENABLED=false` で Phase 1 と同等の回帰（既存テスト PASS）
-- [ ] 3 つの false ルールが noop で `AppliedRule.method=llm` を記録
-- [ ] Intake: ヒューリスティック only / LLM 補完の両方で `Status` が決定的に検証可能
-- [ ] AST: 代表 Markdown でリスト重複・コメント除去がゴールデン一致
-- [ ] `make test` / `make lint` 通過
-- [ ] 秘密情報がログ・レポートに出力されない
+- [x] `LLM_ENABLED=false` で Phase 1 と同等の回帰（既存テスト PASS）
+- [x] 3 つの false ルールが noop で `AppliedRule.method=llm` を記録
+- [x] Intake: ヒューリスティック only / LLM 補完の両方で `Status` が決定的に検証可能
+- [x] AST: 代表 Markdown でリスト重複・コメント除去がゴールデン一致
+- [x] `make test` / `make lint` 通過
+- [x] 秘密情報がログ・レポートに出力されない
 
 ---
 
@@ -594,40 +594,40 @@ infrastructure/llm/
 
 ### 11.0 ドメイン層
 
-- [ ] `domain/llm` — `Completer`, `CompletionIntent`, `CompletionOutcome`, `CompletionBudget`, errors
-- [ ] `domain/refine` — `RefinementIntent`, `RefinementOutcome`
-- [ ] `domain/intake` — `Finding`, `AnalysisReport`, `MergeFindings`, `QuestionsFromFindings`
-- [ ] `domain/budget` — `LLMEnabled`, `LLMMaxCalls`, モデル名フィールド
-- [ ] `domain/bestpractice` — `RulesForRefinement`, Rule 拡張フィールド
-- [ ] `domain/prompt` — `Section.Metadata` 整備（`xml_tag`）
-- [ ] `domain/ast` — 最小 Node 型
+- [x] `domain/llm` — `Completer`, `CompletionIntent`, `CompletionOutcome`, `CompletionBudget`, errors
+- [x] `domain/refine` — `RefinementIntent`, `RefinementOutcome`
+- [x] `domain/intake` — `Finding`, `AnalysisReport`, `MergeFindings`, `QuestionsFromFindings`
+- [x] `domain/budget` — `LLMEnabled`, `LLMMaxCalls`, モデル名フィールド
+- [x] `domain/bestpractice` — `RulesForRefinement`, Rule 拡張フィールド
+- [x] `domain/prompt` — `Section.Metadata` 整備（`xml_tag`）
+- [x] `domain/ast` — 最小 Node 型
 
 ### 11.1 インフラ層
 
-- [ ] `infrastructure/llm` — gemini, anthropic, noop, router, prompts, config
-- [ ] `infrastructure/ast` — goldmark パース, Section マッパー
-- [ ] `infrastructure/stages` — `ASTParse`, `ASTCompress`, `LLMRefiner`
-- [ ] `infrastructure/stages/parse.go` — `Metadata["xml_tag"]` 設定
-- [ ] `infrastructure/config` — LLM 環境変数
-- [ ] `docs/best-practices/*.yaml` + embed ルール — false ルール 3 個追加
+- [x] `infrastructure/llm` — gemini, anthropic, noop, router, prompts, config
+- [x] `infrastructure/ast` — goldmark パース, Section マッパー
+- [x] `infrastructure/stages` — `ASTParse`, `ASTCompress`, `LLMRefiner`
+- [x] `infrastructure/stages/parse.go` — `Metadata["xml_tag"]` 設定
+- [x] `infrastructure/config` — LLM 環境変数
+- [x] `docs/best-practices/*.yaml` + embed ルール — false ルール 3 個追加
 
 ### 11.2 アプリケーション層
 
-- [ ] `application/intake` — Heuristic + LLM + Merge オーケストレーション
-- [ ] `application/optimize` — Compress パイプライン順序更新
+- [x] `application/intake` — Heuristic + LLM + Merge オーケストレーション
+- [x] `application/optimize` — Compress パイプライン順序更新
 
 ### 11.3 Presentation
 
-- [ ] GraphQL スキーマ — `findings`（任意）
-- [ ] `OptimizeReport` — LLM / AST 適用メタデータ
-- [ ] CLI — `--llm` / env 連携
+- [x] GraphQL スキーマ — `findings`（任意）
+- [x] `OptimizeReport` — LLM / AST 適用メタデータ
+- [x] CLI — `--llm` / env 連携
 
 ### 11.4 テスト・ドキュメント
 
-- [ ] `testdata/ast/` ゴールデン
-- [ ] noop Completer 契約テスト
-- [ ] [intake.md](./intake.md) Phase 2 節（本書へのリンク）
-- [ ] [best-practices/README.md](./best-practices/README.md) スキーマ更新
+- [x] `testdata/ast/` ゴールデン
+- [x] noop Completer 契約テスト
+- [x] [intake.md](./intake.md) Phase 2 節（本書へのリンク）
+- [x] [best-practices/README.md](./best-practices/README.md) スキーマ更新
 
 ---
 

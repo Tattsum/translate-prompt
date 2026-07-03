@@ -2,11 +2,14 @@ package intake
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Tattsum/translate-prompt/backend/domain/budget"
 	domainintake "github.com/Tattsum/translate-prompt/backend/domain/intake"
+	"github.com/Tattsum/translate-prompt/backend/domain/llm"
 	"github.com/Tattsum/translate-prompt/backend/domain/prompt"
 	infraBP "github.com/Tattsum/translate-prompt/backend/infrastructure/bestpractice"
 	"github.com/Tattsum/translate-prompt/backend/infrastructure/workspace"
@@ -14,7 +17,8 @@ import (
 
 // UseCase handles analyze, investigate, and merge flows.
 type UseCase struct {
-	Loader *infraBP.Loader
+	Loader    *infraBP.Loader
+	Completer llm.Completer
 }
 
 // NewUseCase creates an intake use case.
@@ -22,8 +26,14 @@ func NewUseCase(loader *infraBP.Loader) *UseCase {
 	return &UseCase{Loader: loader}
 }
 
+// WithCompleter attaches an LLM completer for intake analysis.
+func (uc *UseCase) WithCompleter(c llm.Completer) *UseCase {
+	uc.Completer = c
+	return uc
+}
+
 // Analyze detects ambiguities in the prompt.
-func (uc *UseCase) Analyze(_ context.Context, raw string, cfg budget.Config) (domainintake.AnalyzeResult, error) {
+func (uc *UseCase) Analyze(ctx context.Context, raw string, cfg budget.Config) (domainintake.AnalyzeResult, error) {
 	text := strings.TrimSpace(raw)
 	if text == "" {
 		return domainintake.AnalyzeResult{
@@ -35,18 +45,62 @@ func (uc *UseCase) Analyze(_ context.Context, raw string, cfg budget.Config) (do
 	}
 
 	var questions []domainintake.Question
-	questions = append(questions, detectAmbiguities(text, cfg)...)
+	findings := heuristicFindings(text, cfg)
+
+	var llmFindings []domainintake.Finding
+	if cfg.DeepDive && cfg.LLMEnabled && uc.Completer != nil {
+		llm.ResetBudgetIfSupported(uc.Completer)
+		ctxFindings := make([]llm.ContextFinding, 0, len(findings))
+		for _, f := range findings {
+			ctxFindings = append(ctxFindings, domainintake.ToContextFinding(f))
+		}
+		intent := llm.CompletionIntent{
+			Purpose:       llm.PurposeIntakeAnalyze,
+			TargetProfile: cfg.TargetProfile,
+			InputContent:  text,
+			Context: llm.CompletionContext{
+				HeuristicFindings: ctxFindings,
+				PromptSections:    summarizeSections(prompt.New(text)),
+			},
+		}
+		outcome, err := uc.Completer.Complete(ctx, intent, llm.CompletionBudgetFrom(cfg))
+		if err != nil {
+			if errors.Is(err, llm.ErrBudgetExceeded) {
+				slog.WarnContext(ctx, "intake llm budget exceeded",
+					"target_profile", cfg.TargetProfile,
+					"purpose", llm.PurposeIntakeAnalyze,
+				)
+			} else {
+				slog.WarnContext(ctx, "intake llm analyze failed",
+					"target_profile", cfg.TargetProfile,
+					"purpose", llm.PurposeIntakeAnalyze,
+					"err", err,
+				)
+			}
+		} else {
+			for _, cf := range outcome.Findings {
+				f := domainintake.FindingFromContext(cf)
+				f.Source = domainintake.FindingSourceLLM
+				llmFindings = append(llmFindings, f)
+			}
+		}
+	}
+
+	merged := domainintake.MergeFindings(findings, llmFindings)
+	questions = domainintake.QuestionsFromFindings(merged)
 
 	if cfg.DeepDive && len(questions) > 0 {
 		return domainintake.AnalyzeResult{
 			Status:    domainintake.StatusNeedsInput,
 			Questions: questions,
+			Findings:  merged,
 		}, nil
 	}
 
 	return domainintake.AnalyzeResult{
-		Status: domainintake.StatusReady,
-		Prompt: text,
+		Status:   domainintake.StatusReady,
+		Prompt:   text,
+		Findings: findingsForResponse(cfg, merged),
 	}, nil
 }
 
@@ -88,6 +142,57 @@ func MergeContext(raw string, inv domainintake.InvestigationResult) string {
 		})
 	}
 	return p.Assemble()
+}
+
+func heuristicFindings(text string, cfg budget.Config) []domainintake.Finding {
+	questions := detectAmbiguities(text, cfg)
+	findings := make([]domainintake.Finding, 0, len(questions))
+	for _, q := range questions {
+		findings = append(findings, questionToFinding(q))
+	}
+	return findings
+}
+
+func questionToFinding(q domainintake.Question) domainintake.Finding {
+	category := questionCategory(q.ID)
+	return domainintake.Finding{
+		ID:       q.ID,
+		Category: category,
+		Severity: 3,
+		RuleID:   q.RuleID,
+		Summary:  q.Text,
+		Source:   domainintake.FindingSourceHeuristic,
+	}
+}
+
+func questionCategory(id string) string {
+	switch id {
+	case "goal":
+		return "goal_unclear"
+	case "scope":
+		return "scope_missing"
+	case "priority":
+		return "contradiction"
+	case "acceptance":
+		return "acceptance_missing"
+	default:
+		return id
+	}
+}
+
+func summarizeSections(p *prompt.Prompt) []llm.PromptSectionSummary {
+	out := make([]llm.PromptSectionSummary, 0, len(p.Sections))
+	for i, s := range p.Sections {
+		content := s.Content
+		if len(content) > 2000 {
+			content = content[:2000]
+		}
+		out = append(out, llm.PromptSectionSummary{
+			Ref:     llm.SectionRef{Index: i, ID: s.ID, Type: s.Type},
+			Content: content,
+		})
+	}
+	return out
 }
 
 func detectAmbiguities(text string, cfg budget.Config) []domainintake.Question {
@@ -211,4 +316,11 @@ func profileRuleID(profile budget.TargetProfile, kind string) string {
 	default:
 		return kind
 	}
+}
+
+func findingsForResponse(cfg budget.Config, merged []domainintake.Finding) []domainintake.Finding {
+	if !cfg.DeepDive {
+		return nil
+	}
+	return merged
 }

@@ -29,6 +29,7 @@ type AnalyzeResult struct {
 	Status    Status
 	Questions []Question
 	Prompt    string
+	Findings  []Finding
 }
 
 // InvestigationFile is a workspace file discovered during investigation.

@@ -13,6 +13,7 @@ import (
 	"github.com/Tattsum/translate-prompt/backend/application/optimize"
 	"github.com/Tattsum/translate-prompt/backend/domain/budget"
 	infraBP "github.com/Tattsum/translate-prompt/backend/infrastructure/bestpractice"
+	infrallm "github.com/Tattsum/translate-prompt/backend/infrastructure/llm"
 )
 
 // Config holds CLI flag values.
@@ -25,6 +26,7 @@ type Config struct {
 	ReportFormat  string
 	DryRun        bool
 	DeepDive      bool
+	LLMEnabled    bool
 	Workspace     string
 }
 
@@ -41,6 +43,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	fs.StringVar(&cfg.ReportFormat, "report", "text", "report format: text|json|none")
 	fs.BoolVar(&cfg.DryRun, "dry-run", false, "report only, no output file")
 	fs.BoolVar(&cfg.DeepDive, "deep-dive", false, "enable intake deep dive")
+	fs.BoolVar(&cfg.LLMEnabled, "llm", false, "enable LLM complement (also LLM_ENABLED env)")
 	fs.StringVar(&cfg.Workspace, "workspace", "", "workspace path for investigation")
 
 	if err := fs.Parse(args); err != nil {
@@ -70,6 +73,10 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
+	llmCfg := infrallm.LoadConfigFromEnv()
+	llmCfg.Enabled = llmCfg.Enabled || cfg.LLMEnabled
+	llmService := infrallm.NewService(llmCfg)
+
 	optCfg := budget.Config{
 		MaxTokens:     cfg.MaxTokens,
 		TargetProfile: profile,
@@ -77,10 +84,11 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		DeepDive:      cfg.DeepDive,
 		WorkspacePath: cfg.Workspace,
 	}
+	llmCfg.ApplyToBudgetConfig(&optCfg)
 
 	promptText := raw
 	if cfg.DeepDive {
-		intakeUC := appintake.NewUseCase(loader)
+		intakeUC := appintake.NewUseCase(loader).WithCompleter(llmService)
 		result, err := intakeUC.Analyze(ctx, raw, optCfg)
 		if err != nil {
 			fmt.Fprintf(stderr, "error analyzing: %v\n", err)
@@ -112,6 +120,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "error creating optimizer: %v\n", err)
 		return 1
 	}
+	optUC.WithCompleter(llmService)
 
 	result, err := optUC.Optimize(ctx, promptText, optCfg)
 	if err != nil {
