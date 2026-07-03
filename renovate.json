@@ -50,7 +50,7 @@
       "groupSlug": "docker"
     },
     {
-      "matchManagers": ["regex"],
+      "matchManagers": ["custom.regex"],
       "groupName": "toolchain pins",
       "groupSlug": "toolchain"
     },
@@ -65,45 +65,48 @@
       "enabled": false
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Pin Go toolchain in mise.toml",
-      "fileMatch": ["^mise\\.toml$"],
+      "managerFilePatterns": ["/^mise\\.toml$/"],
       "matchStrings": ["go = \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "golang/go",
       "versioningTemplate": "semver-coerced"
     },
     {
+      "customType": "regex",
       "description": "Pin golangci-lint in mise.toml",
-      "fileMatch": ["^mise\\.toml$"],
+      "managerFilePatterns": ["/^mise\\.toml$/"],
       "matchStrings": ["golangci-lint = \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "golangci/golangci-lint",
       "versioningTemplate": "semver"
     },
     {
+      "customType": "regex",
       "description": "Pin gqlgen in Makefile",
-      "fileMatch": ["^Makefile$"],
+      "managerFilePatterns": ["/^Makefile$/"],
       "matchStrings": ["gqlgen@(?<currentValue>v?[0-9.]+)"],
       "datasourceTemplate": "go",
       "depNameTemplate": "github.com/99designs/gqlgen",
       "versioningTemplate": "semver"
     },
     {
+      "customType": "regex",
       "description": "Pin golangci-lint in Makefile",
-      "fileMatch": ["^Makefile$"],
+      "managerFilePatterns": ["/^Makefile$/"],
       "matchStrings": ["golangci-lint@(?<currentValue>v?[0-9.]+)"],
       "datasourceTemplate": "go",
       "depNameTemplate": "github.com/golangci/golangci-lint/v2/cmd/golangci-lint",
       "versioningTemplate": "semver"
     },
     {
+      "customType": "regex",
       "description": "Pin buf remote plugins in buf.gen.yaml",
-      "fileMatch": ["^backend/buf\\.gen\\.yaml$"],
-      "matchStrings": [
-        "remote: buf\\.build/(?<depName>[^:]+):(?<currentValue>[^\\s]+)"
-      ],
+      "managerFilePatterns": ["/^backend/buf\\.gen\\.yaml$/"],
+      "matchStrings": ["remote: buf\\.build/(?<depName>[^:]+):(?<currentValue>[^\\s]+)"],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
     }
