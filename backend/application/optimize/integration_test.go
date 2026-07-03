@@ -24,12 +24,12 @@ func TestOptimize_Integration_LLMRefiner_NoOp(t *testing.T) {
 	loader := mustOptimizeLoader(t)
 
 	cases := []struct {
-		name    string
-		profile budget.TargetProfile
+		name     string
+		profile  budget.TargetProfile
 		sections []prompt.Section
-		ruleID  string
-		maxTok  int
-		shorter string
+		ruleID   string
+		maxTok   int
+		shorter  string
 	}{
 		{
 			name:    "cursor-actionable-semantic",
@@ -58,7 +58,7 @@ func TestOptimize_Integration_LLMRefiner_NoOp(t *testing.T) {
 			profile: budget.ProfileCodex,
 			sections: []prompt.Section{{
 				ID: "examples-0", Type: prompt.SectionTypeCode,
-				Content: readOptimizeFixture(t, "llm_common_examples_body.md"),
+				Content:  readOptimizeFixture(t, "llm_common_examples_body.md"),
 				Metadata: map[string]string{"xml_tag": "examples"},
 			}},
 			ruleID:  "common-example-summarize",

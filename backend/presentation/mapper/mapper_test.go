@@ -21,7 +21,7 @@ func TestAnalyzeToGraphQL_IncludesFindings(t *testing.T) {
 		Findings: []domainintake.Finding{{
 			ID: "goal", Category: "goal_unclear", Severity: 3,
 			SectionRef: llm.SectionRef{ID: "task-0", Type: prompt.SectionTypeTask},
-			RuleID: "goal", Summary: "Define success", Source: domainintake.FindingSourceHeuristic,
+			RuleID:     "goal", Summary: "Define success", Source: domainintake.FindingSourceHeuristic,
 		}},
 	})
 	if len(out.Findings) != 1 {
