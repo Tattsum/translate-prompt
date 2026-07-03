@@ -280,15 +280,17 @@ const connectTransport = createConnectTransport({ baseUrl: apiBase || '/' })
 
 ### 5. Cloudflare Access
 
-手動設定の詳細: [deployment-access-setup.md](./deployment-access-setup.md)
+手動設定の詳細: [deployment-access-setup.md](./deployment-access-setup.md)（**2026-07-03 設定完了**）
 
 Zero Trust ダッシュボードで設定（手動・初回のみ）。
 
-1. **Applications** → Add application → Self-hosted
-2. アプリ 1: `translate.tattsum.com`（Pages）
-3. アプリ 2: `prompt-api.tattsum.com`（Workers）
-4. **Policy**: Allow — Emails ending in `@<your-email-domain>` または特定メール / GitHub OAuth
-5. β 招待者はメールまたは IdP グループで追加
+1. **Integrations** → Identity providers — Google + GitHub（Callback: `https://jolly-glitter-2f2b.cloudflareaccess.com/cdn-cgi/access/callback`）
+2. **Access コントロール** → Applications → **セルフホストとプライベート** → **パブリック DNS**
+3. アプリ 1: サブドメイン `translate` + ドメイン `tattsum.com`（`translate-prompt-spa`）
+4. アプリ 2: サブドメイン `prompt-api` + ドメイン `tattsum.com`（`translate-prompt-api`）
+5. **Policy**: Allow — Emails（個別招待）。β 招待者は Policy の Include にメール追加
+
+> **プライベート宛先**（Tunnel ウィザード）は使わない。本番は Workers + 公開 DNS。
 
 Access を Workers / Pages の前段に置くため、DNS は Cloudflare プロキシ（オレンジ雲）必須。
 
@@ -422,11 +424,11 @@ jobs:
 > - Access: [deployment-access-setup.md](./deployment-access-setup.md)
 > - `./scripts/deployment-smoke-test.sh`
 
-**完了条件**:
+**完了条件**（2026-07-03 達成）:
 
-- [ ] `translate.tattsum.com` が Worker 経由で SPA を返す（200 または Access 302）
-- [ ] Access ログイン後に Analyze → Optimize が動作
-- [ ] Investigate が Web から失敗する（期待通り）
+- [x] `translate.tattsum.com` が Worker 経由で Access 302 を返す
+- [x] Access ログイン後に Analyze → Optimize が動作
+- [x] Investigate が Web から失敗する（期待通り）
 
 ---
 
@@ -479,6 +481,9 @@ CI の `deploy-pages` が `wrangler pages deploy` を実行。
 ./scripts/deployment-smoke-test.sh
 ```
 
+Access 設定後は未認証 curl で SPA / API が **302** となる（PASS）。オリジン疎通は Fly 直結で確認。  
+GraphQL / CORS は **ログイン後ブラウザ**で MANUAL 確認（2026-07-03 確認済み）。
+
 | # | 確認項目 | 期待結果 |
 |---|---------|---------|
 | 1 | 未認証で `translate.tattsum.com` にアクセス | Access ログイン画面 |
@@ -499,7 +504,7 @@ CI の `deploy-pages` が `wrangler pages deploy` を実行。
 - [ ] Fly オリジンは必要最小限（Tunnel 導入で非公開化を検討）
 - [ ] `INVESTIGATE_ENABLED=false`（サーバ FS 読み取り防止）
 - [ ] CORS は `translate.tattsum.com` のみ
-- [ ] Access ポリシーで招待者限定
+- [x] Access ポリシーで招待者限定（Google + GitHub IdP、`invite-only` Emails）
 - [ ] GraphQL Playground は本番無効（`ENV=production`）
 - [ ] GitHub Secrets に API トークンのみ（`.env` をコミットしない）
 - [ ] リクエストボディサイズ上限の検討（将来: Workers で制限）
