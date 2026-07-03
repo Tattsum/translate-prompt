@@ -40,6 +40,21 @@ cat prompt.md | ./bin/translate-prompt --max-tokens 8000 --target-profile codex
 | [docs/api.md](./docs/api.md) | REST API / CLI |
 | [docs/implementation-roadmap.md](./docs/implementation-roadmap.md) | 実装チェックリスト |
 | [docs/deployment.md](./docs/deployment.md) | Web 公開デプロイ設計（Cloudflare） |
+| [docs/deployment-access-setup.md](./docs/deployment-access-setup.md) | Cloudflare Access 設定手順 |
+
+## Web β（本番）
+
+| コンポーネント | URL |
+|---------------|-----|
+| SPA | https://translate.tattsum.com |
+| API | https://prompt-api.tattsum.com |
+
+```bash
+# 本番スモークテスト（自動チェック）
+./scripts/deployment-smoke-test.sh
+```
+
+招待制 β のため Cloudflare Access 設定が必要です。手順は [docs/deployment-access-setup.md](./docs/deployment-access-setup.md) を参照してください。
 
 ## 依存関係の自動更新（Renovate）
 

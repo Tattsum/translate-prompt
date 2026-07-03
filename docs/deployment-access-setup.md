@@ -3,6 +3,29 @@
 手動設定。Zero Trust ダッシュボードで実施する。  
 対象アカウント: **Kurohari35@gmail.com's Account**（`tattsum.com` ゾーン）
 
+## 現状（2026-07-03）
+
+| 項目 | 状態 |
+|------|------|
+| DNS / Workers | 完了（`translate.tattsum.com` → 200） |
+| API 疎通 | 完了（Estimate / Analyze / Optimize 動作確認済み） |
+| **Cloudflare Access** | **未設定**（現状は認証なしでアクセス可能） |
+
+Access 設定後は、未認証アクセスで `302` リダイレクト（ログイン画面）が返るようになる。
+
+## 完了チェックリスト
+
+設定が終わったら以下を確認する。
+
+- [ ] IdP（Google / GitHub 等）が追加済み
+- [ ] Application `translate-prompt-spa`（`translate.tattsum.com`）作成済み
+- [ ] Application `translate-prompt-api`（`prompt-api.tattsum.com`）作成済み
+- [ ] 両アプリに `invite-only` ポリシー適用済み
+- [ ] シークレットウィンドウで SPA → Access ログイン画面
+- [ ] ログイン後 Input ページ表示
+- [ ] Analyze → Optimize が動作
+- [ ] `./scripts/deployment-smoke-test.sh` で SPA が `302`（Access リダイレクト）を返す
+
 ## 前提
 
 - DNS が Cloudflare プロキシ（オレンジ雲）ON であること
@@ -12,9 +35,12 @@
 ## 1. Identity Provider（初回のみ）
 
 1. [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) を開く
-2. **Settings** → **Authentication**
-3. 利用する IdP を追加（例: **Google** または **GitHub**）
-4. テストログインが成功することを確認
+2. 右上のアカウントが **Kurohari35@gmail.com's Account** であることを確認
+3. **Settings** → **Authentication**
+4. 利用する IdP を追加（推奨: **Google** または **GitHub**）
+5. テストログインが成功することを確認
+
+> ローカルの `wrangler whoami` は別アカウントの場合がある。Access 設定は Zero Trust ダッシュボードで行う。
 
 ## 2. Application 1: SPA
 
@@ -35,9 +61,13 @@
 |------|-----|
 | Policy name | `invite-only` |
 | Action | **Allow** |
-| Include | 例: `Emails ending in @yourdomain.com`、または `Emails` で招待メールを列挙 |
+| Include | **Emails** で自分のメールを追加（β 初期は個別招待が安全） |
+
+> β 初期は `Emails ending in @...` より **Emails** で個別列挙を推奨。意図しない公開を防げる。
 
 5. **Save application**
+
+**確認:** シークレットウィンドウで `https://translate.tattsum.com` を開き、Access ログイン画面が表示されること。
 
 ## 3. Application 2: API
 
@@ -50,8 +80,10 @@
 | Session Duration | `24 hours` |
 | Application domain | `prompt-api.tattsum.com` |
 
-3. Policy は SPA と同じ招待条件（`invite-only`）を適用
+3. Policy は SPA と**同じ** `invite-only` 条件を適用（Include のメール一覧を揃える）
 4. **Save application**
+
+**確認:** ログイン後、ブラウザ DevTools の Network で `prompt-api.tattsum.com/query` が 200 を返すこと。
 
 ## 4. 動作確認
 
