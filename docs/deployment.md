@@ -154,6 +154,11 @@ docs/deployment-dns-setup.md        # DNS / Workers Route 手動設定
 | `ENV` | `dev` | `production` |
 | `INVESTIGATE_ENABLED` | `true`（省略可） | `false` |
 | `ALLOWED_ORIGINS` | `*`（省略可） | `https://translate.tattsum.com` |
+| `LLM_ENABLED` | `false`（省略可） | `true`（App-2 LLM 有効化時） |
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | — | Gemini 利用時（[llm-setup.md](./llm-setup.md)） |
+| `ANTHROPIC_API_KEY` | — | `claude` Profile + LLM 時 |
+
+LLM のキー取得・ローカル設定の詳細は [llm-setup.md](./llm-setup.md) を参照。
 
 #### Dockerfile（方針）
 
@@ -361,6 +366,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-1 に従い、Go サーバの本番対応を実装してください。
+>
 > - `LISTEN_HOST`, `ALLOWED_ORIGINS`, `INVESTIGATE_ENABLED` 環境変数
 > - `build-server-api` Makefile ターゲット（embed なし）
 > - `Dockerfile`, `fly.toml`
@@ -378,6 +384,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-2 に従い、SPA の API ベース URL 外部化と Settings UI 調整を実装してください。
+>
 > - `VITE_API_BASE_URL`, `VITE_ENABLE_WORKSPACE_PATH`
 > - `frontend/src/api/client.ts` 更新
 > - Vitest 更新
@@ -393,6 +400,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-3 に従い、Cloudflare Workers API プロキシを実装してください。
+>
 > - `wrangler.toml`, `workers/src/index.ts`
 > - `/query` と Connect-RPC パスの転送
 > - CORS は Go 側と整合させる
@@ -407,6 +415,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-4 に従い、`.github/workflows/deploy.yml` を作成してください。
+>
 > - test → fly / workers / pages の順
 > - Secrets 名はドキュメント通り
 
@@ -420,6 +429,7 @@ jobs:
 **プロンプト例**:
 
 > WP-5 に従い、DNS / Access の手動セットアップとスモークテストを実施。
+>
 > - DNS: [deployment-dns-setup.md](./deployment-dns-setup.md)
 > - Access: [deployment-access-setup.md](./deployment-access-setup.md)
 > - `./scripts/deployment-smoke-test.sh`
@@ -441,6 +451,9 @@ jobs:
 fly auth login
 fly apps create translate-prompt-api
 fly secrets set INVESTIGATE_ENABLED=false ALLOWED_ORIGINS=https://translate.tattsum.com
+
+# App-2 LLM（任意）— キー取得手順: docs/llm-setup.md
+# fly secrets set LLM_ENABLED=true GOOGLE_API_KEY="..." ANTHROPIC_API_KEY="..."
 
 # デプロイ（CI 整備後は Actions から。secrets は deploy-fly で同期）
 fly deploy

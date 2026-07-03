@@ -14,10 +14,22 @@ export interface Question {
   rule_id?: string
 }
 
+export interface Finding {
+  id: string
+  category: string
+  severity: number
+  section_id?: string
+  section_type?: string
+  rule_id?: string
+  summary: string
+  source: 'heuristic' | 'llm'
+}
+
 export interface AnalyzeResponse {
   status: 'needs_input' | 'ready'
   questions?: Question[]
   prompt?: string
+  findings?: Finding[]
 }
 
 export interface OptimizeReport {
@@ -25,7 +37,13 @@ export interface OptimizeReport {
   output_tokens: number
   reduction_percent: number
   target_profile: string
-  applied_rules: Array<{ id: string; source_url: string; tokens_delta?: number }>
+  applied_rules: Array<{
+    id: string
+    source_url: string
+    tokens_delta?: number
+    method?: string
+    model?: string
+  }>
   truncated_sections: string[]
   stage_results: unknown[]
 }

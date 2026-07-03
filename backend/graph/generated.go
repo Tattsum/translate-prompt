@@ -39,6 +39,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	AnalyzeResult struct {
+		Findings  func(childComplexity int) int
 		Prompt    func(childComplexity int) int
 		Questions func(childComplexity int) int
 		Status    func(childComplexity int) int
@@ -46,12 +47,25 @@ type ComplexityRoot struct {
 
 	AppliedRule struct {
 		ID          func(childComplexity int) int
+		Method      func(childComplexity int) int
+		Model       func(childComplexity int) int
 		SourceURL   func(childComplexity int) int
 		TokensDelta func(childComplexity int) int
 	}
 
 	EstimateResult struct {
 		Tokens func(childComplexity int) int
+	}
+
+	Finding struct {
+		Category    func(childComplexity int) int
+		ID          func(childComplexity int) int
+		RuleID      func(childComplexity int) int
+		SectionID   func(childComplexity int) int
+		SectionType func(childComplexity int) int
+		Severity    func(childComplexity int) int
+		Source      func(childComplexity int) int
+		Summary     func(childComplexity int) int
 	}
 
 	Health struct {
@@ -143,6 +157,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "AnalyzeResult.findings":
+		if e.ComplexityRoot.AnalyzeResult.Findings == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AnalyzeResult.Findings(childComplexity), true
 	case "AnalyzeResult.prompt":
 		if e.ComplexityRoot.AnalyzeResult.Prompt == nil {
 			break
@@ -168,6 +188,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.AppliedRule.ID(childComplexity), true
+	case "AppliedRule.method":
+		if e.ComplexityRoot.AppliedRule.Method == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AppliedRule.Method(childComplexity), true
+	case "AppliedRule.model":
+		if e.ComplexityRoot.AppliedRule.Model == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AppliedRule.Model(childComplexity), true
 	case "AppliedRule.sourceUrl":
 		if e.ComplexityRoot.AppliedRule.SourceURL == nil {
 			break
@@ -187,6 +219,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.EstimateResult.Tokens(childComplexity), true
+
+	case "Finding.category":
+		if e.ComplexityRoot.Finding.Category == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.Category(childComplexity), true
+	case "Finding.id":
+		if e.ComplexityRoot.Finding.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.ID(childComplexity), true
+	case "Finding.ruleId":
+		if e.ComplexityRoot.Finding.RuleID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.RuleID(childComplexity), true
+	case "Finding.sectionId":
+		if e.ComplexityRoot.Finding.SectionID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.SectionID(childComplexity), true
+	case "Finding.sectionType":
+		if e.ComplexityRoot.Finding.SectionType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.SectionType(childComplexity), true
+	case "Finding.severity":
+		if e.ComplexityRoot.Finding.Severity == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.Severity(childComplexity), true
+	case "Finding.source":
+		if e.ComplexityRoot.Finding.Source == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.Source(childComplexity), true
+	case "Finding.summary":
+		if e.ComplexityRoot.Finding.Summary == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Finding.Summary(childComplexity), true
 
 	case "Health.status":
 		if e.ComplexityRoot.Health.Status == nil {
@@ -488,6 +569,8 @@ func (ec *executionContext) childFields_AnalyzeResult(ctx context.Context, field
 		return ec.fieldContext_AnalyzeResult_questions(ctx, field)
 	case "prompt":
 		return ec.fieldContext_AnalyzeResult_prompt(ctx, field)
+	case "findings":
+		return ec.fieldContext_AnalyzeResult_findings(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type AnalyzeResult", field.Name)
 }
@@ -500,6 +583,10 @@ func (ec *executionContext) childFields_AppliedRule(ctx context.Context, field g
 		return ec.fieldContext_AppliedRule_sourceUrl(ctx, field)
 	case "tokensDelta":
 		return ec.fieldContext_AppliedRule_tokensDelta(ctx, field)
+	case "method":
+		return ec.fieldContext_AppliedRule_method(ctx, field)
+	case "model":
+		return ec.fieldContext_AppliedRule_model(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type AppliedRule", field.Name)
 }
@@ -510,6 +597,28 @@ func (ec *executionContext) childFields_EstimateResult(ctx context.Context, fiel
 		return ec.fieldContext_EstimateResult_tokens(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type EstimateResult", field.Name)
+}
+
+func (ec *executionContext) childFields_Finding(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_Finding_id(ctx, field)
+	case "category":
+		return ec.fieldContext_Finding_category(ctx, field)
+	case "severity":
+		return ec.fieldContext_Finding_severity(ctx, field)
+	case "sectionId":
+		return ec.fieldContext_Finding_sectionId(ctx, field)
+	case "sectionType":
+		return ec.fieldContext_Finding_sectionType(ctx, field)
+	case "ruleId":
+		return ec.fieldContext_Finding_ruleId(ctx, field)
+	case "summary":
+		return ec.fieldContext_Finding_summary(ctx, field)
+	case "source":
+		return ec.fieldContext_Finding_source(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Finding", field.Name)
 }
 
 func (ec *executionContext) childFields_Health(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -934,6 +1043,38 @@ func (ec *executionContext) fieldContext_AnalyzeResult_prompt(_ context.Context,
 	return graphql.NewScalarFieldContext("AnalyzeResult", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
+func (ec *executionContext) _AnalyzeResult_findings(ctx context.Context, field graphql.CollectedField, obj *model.AnalyzeResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_AnalyzeResult_findings(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Findings, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Finding) graphql.Marshaler {
+			return ec.marshalOFinding2ᚕᚖgithubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFindingᚄ(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_AnalyzeResult_findings(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AnalyzeResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Finding(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AppliedRule_id(ctx context.Context, field graphql.CollectedField, obj *model.AppliedRule) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1003,6 +1144,52 @@ func (ec *executionContext) fieldContext_AppliedRule_tokensDelta(_ context.Conte
 	return graphql.NewScalarFieldContext("AppliedRule", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
+func (ec *executionContext) _AppliedRule_method(ctx context.Context, field graphql.CollectedField, obj *model.AppliedRule) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_AppliedRule_method(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Method, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_AppliedRule_method(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("AppliedRule", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _AppliedRule_model(ctx context.Context, field graphql.CollectedField, obj *model.AppliedRule) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_AppliedRule_model(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Model, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_AppliedRule_model(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("AppliedRule", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
 func (ec *executionContext) _EstimateResult_tokens(ctx context.Context, field graphql.CollectedField, obj *model.EstimateResult) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1024,6 +1211,190 @@ func (ec *executionContext) _EstimateResult_tokens(ctx context.Context, field gr
 }
 func (ec *executionContext) fieldContext_EstimateResult_tokens(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("EstimateResult", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_id(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type ID does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_category(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_category(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Category, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_category(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_severity(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_severity(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Severity, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_severity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type Int does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_sectionId(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_sectionId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.SectionID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_sectionId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_sectionType(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_sectionType(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.SectionType, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_sectionType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_ruleId(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_ruleId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RuleID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_ruleId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_summary(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_summary(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Summary, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_summary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _Finding_source(ctx context.Context, field graphql.CollectedField, obj *model.Finding) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Finding_source(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Source, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v model.FindingSource) graphql.Marshaler {
+			return ec.marshalNFindingSource2githubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFindingSource(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Finding_source(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Finding", field, false, false, errors.New("field of type FindingSource does not have child fields"))
 }
 
 func (ec *executionContext) _Health_status(ctx context.Context, field graphql.CollectedField, obj *model.Health) (ret graphql.Marshaler) {
@@ -3107,6 +3478,11 @@ func (ec *executionContext) _AnalyzeResult(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
+		case "findings":
+			out.Values[i] = ec._AnalyzeResult_findings(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3156,6 +3532,16 @@ func (ec *executionContext) _AppliedRule(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
+		case "method":
+			out.Values[i] = ec._AppliedRule_method(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "model":
+			out.Values[i] = ec._AppliedRule_model(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3192,6 +3578,80 @@ func (ec *executionContext) _EstimateResult(ctx context.Context, sel ast.Selecti
 			out.Values[i] = graphql.MarshalString("EstimateResult")
 		case "tokens":
 			out.Values[i] = ec._EstimateResult_tokens(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferred), math.MaxInt32)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var findingImplementors = []string{"Finding"}
+
+func (ec *executionContext) _Finding(ctx context.Context, sel ast.SelectionSet, obj *model.Finding) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, findingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Finding")
+		case "id":
+			out.Values[i] = ec._Finding_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "category":
+			out.Values[i] = ec._Finding_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "severity":
+			out.Values[i] = ec._Finding_severity(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sectionId":
+			out.Values[i] = ec._Finding_sectionId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "sectionType":
+			out.Values[i] = ec._Finding_sectionType(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "ruleId":
+			out.Values[i] = ec._Finding_ruleId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "summary":
+			out.Values[i] = ec._Finding_summary(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "source":
+			out.Values[i] = ec._Finding_source(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4241,6 +4701,26 @@ func (ec *executionContext) marshalNEstimateResult2ᚖgithubᚗcomᚋTattsumᚋt
 	return ec._EstimateResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNFinding2ᚖgithubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFinding(ctx context.Context, sel ast.SelectionSet, v *model.Finding) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Finding(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFindingSource2githubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFindingSource(ctx context.Context, v any) (model.FindingSource, error) {
+	var res model.FindingSource
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFindingSource2githubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFindingSource(ctx context.Context, sel ast.SelectionSet, v model.FindingSource) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
 	res, err := graphql.UnmarshalFloatContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4637,6 +5117,25 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOFinding2ᚕᚖgithubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Finding) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNFinding2ᚖgithubᚗcomᚋTattsumᚋtranslateᚑpromptᚋbackendᚋgraphᚋmodelᚐFinding(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {

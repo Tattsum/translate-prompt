@@ -9,6 +9,7 @@ import (
 
 	appintake "github.com/Tattsum/translate-prompt/backend/application/intake"
 	"github.com/Tattsum/translate-prompt/backend/application/optimize"
+	"github.com/Tattsum/translate-prompt/backend/domain/budget"
 	domainintake "github.com/Tattsum/translate-prompt/backend/domain/intake"
 	translatepromptv1 "github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1"
 	"github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1/translate_promptv1connect"
@@ -20,15 +21,21 @@ type Service struct {
 	optimize           *optimize.UseCase
 	intake             *appintake.UseCase
 	investigateEnabled bool
+	llmDefaults        budget.Config
 }
 
 // NewService wires use cases into the Connect handler.
-func NewService(opt *optimize.UseCase, intake *appintake.UseCase, investigateEnabled bool) *Service {
+func NewService(opt *optimize.UseCase, intake *appintake.UseCase, investigateEnabled bool, llmDefaults budget.Config) *Service {
 	return &Service{
 		optimize:           opt,
 		intake:             intake,
 		investigateEnabled: investigateEnabled,
+		llmDefaults:        llmDefaults,
 	}
+}
+
+func (s *Service) enrichConfig(cfg budget.Config) budget.Config {
+	return budget.EnrichLLMDefaults(cfg, s.llmDefaults)
 }
 
 // Mount registers the Connect service on mux at the standard path prefix.
@@ -48,7 +55,7 @@ func (s *Service) Analyze(
 	ctx context.Context,
 	req *connect.Request[translatepromptv1.AnalyzeRequest],
 ) (*connect.Response[translatepromptv1.AnalyzeResponse], error) {
-	cfg := mapper.ConfigFromProto(req.Msg.Config)
+	cfg := s.enrichConfig(mapper.ConfigFromProto(req.Msg.Config))
 	result, err := s.intake.Analyze(ctx, req.Msg.Prompt, cfg)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("analyze: %w", err))
@@ -75,7 +82,7 @@ func (s *Service) Optimize(
 	ctx context.Context,
 	req *connect.Request[translatepromptv1.OptimizeRequest],
 ) (*connect.Response[translatepromptv1.OptimizeResponse], error) {
-	cfg := mapper.ConfigFromProto(req.Msg.Config)
+	cfg := s.enrichConfig(mapper.ConfigFromProto(req.Msg.Config))
 	promptText, cfg, err := mapper.PrepareOptimizePrompt(ctx, s.intake, req.Msg.Prompt, cfg, req.Msg.Answers)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("prepare: %w", err))

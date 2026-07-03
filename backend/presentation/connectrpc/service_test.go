@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 
+	"github.com/Tattsum/translate-prompt/backend/domain/budget"
 	"github.com/Tattsum/translate-prompt/backend/domain/intake"
 	translatepromptv1 "github.com/Tattsum/translate-prompt/backend/gen/translate_prompt/v1"
 	"github.com/Tattsum/translate-prompt/backend/presentation/connectrpc"
@@ -14,7 +15,7 @@ import (
 
 func TestInvestigate_Disabled(t *testing.T) {
 	t.Parallel()
-	svc := connectrpc.NewService(nil, nil, false)
+	svc := connectrpc.NewService(nil, nil, false, budget.Config{})
 	_, err := svc.Investigate(context.Background(), connect.NewRequest(&translatepromptv1.InvestigateRequest{
 		WorkspacePath: "/tmp",
 		TargetProfile: "codex",

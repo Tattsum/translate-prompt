@@ -37,6 +37,9 @@ func (ParseSections) Apply(_ context.Context, p *prompt.Prompt, _ budget.Config)
 				ID:      tag + "-" + itoa(i),
 				Type:    mapTagToType(tag),
 				Content: content,
+				Metadata: map[string]string{
+					"xml_tag": tag,
+				},
 			})
 		}
 		return cp, optimizer.StageResult{StageName: "ParseSections"}, nil

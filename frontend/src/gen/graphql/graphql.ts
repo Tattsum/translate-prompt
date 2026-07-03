@@ -24,6 +24,7 @@ export type AnalyzeInput = {
 
 export type AnalyzeResult = {
   __typename?: 'AnalyzeResult';
+  findings?: Maybe<Array<Finding>>;
   prompt?: Maybe<Scalars['String']['output']>;
   questions?: Maybe<Array<Question>>;
   status: AnalyzeStatus;
@@ -37,6 +38,8 @@ export enum AnalyzeStatus {
 export type AppliedRule = {
   __typename?: 'AppliedRule';
   id: Scalars['ID']['output'];
+  method?: Maybe<Scalars['String']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
   sourceUrl: Scalars['String']['output'];
   tokensDelta?: Maybe<Scalars['Int']['output']>;
 };
@@ -45,6 +48,23 @@ export type EstimateResult = {
   __typename?: 'EstimateResult';
   tokens: Scalars['Int']['output'];
 };
+
+export type Finding = {
+  __typename?: 'Finding';
+  category: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  ruleId?: Maybe<Scalars['String']['output']>;
+  sectionId?: Maybe<Scalars['String']['output']>;
+  sectionType?: Maybe<Scalars['String']['output']>;
+  severity: Scalars['Int']['output'];
+  source: FindingSource;
+  summary: Scalars['String']['output'];
+};
+
+export enum FindingSource {
+  Heuristic = 'HEURISTIC',
+  Llm = 'LLM'
+}
 
 export type Health = {
   __typename?: 'Health';
@@ -165,7 +185,7 @@ export type AnalyzeMutationVariables = Exact<{
 }>;
 
 
-export type AnalyzeMutation = { __typename?: 'Mutation', analyze: { __typename?: 'AnalyzeResult', status: AnalyzeStatus, prompt?: string | null, questions?: Array<{ __typename?: 'Question', id: string, text: string, ruleId?: string | null }> | null } };
+export type AnalyzeMutation = { __typename?: 'Mutation', analyze: { __typename?: 'AnalyzeResult', status: AnalyzeStatus, prompt?: string | null, questions?: Array<{ __typename?: 'Question', id: string, text: string, ruleId?: string | null }> | null, findings?: Array<{ __typename?: 'Finding', id: string, category: string, severity: number, sectionId?: string | null, sectionType?: string | null, ruleId?: string | null, summary: string, source: FindingSource }> | null } };
 
 export type InvestigateMutationVariables = Exact<{
   input: InvestigateInput;
@@ -179,7 +199,7 @@ export type OptimizeMutationVariables = Exact<{
 }>;
 
 
-export type OptimizeMutation = { __typename?: 'Mutation', optimize: { __typename?: 'OptimizeResult', optimizedPrompt: string, artifacts: { __typename?: 'OptimizeArtifacts', cursorMdcSuggestions?: Array<{ __typename?: 'MdcSuggestion', filename: string, content: string }> | null }, report: { __typename?: 'OptimizeReport', inputTokens: number, outputTokens: number, reductionPercent: number, targetProfile: string, truncatedSections: Array<string>, appliedRules: Array<{ __typename?: 'AppliedRule', id: string, sourceUrl: string, tokensDelta?: number | null }> } } };
+export type OptimizeMutation = { __typename?: 'Mutation', optimize: { __typename?: 'OptimizeResult', optimizedPrompt: string, artifacts: { __typename?: 'OptimizeArtifacts', cursorMdcSuggestions?: Array<{ __typename?: 'MdcSuggestion', filename: string, content: string }> | null }, report: { __typename?: 'OptimizeReport', inputTokens: number, outputTokens: number, reductionPercent: number, targetProfile: string, truncatedSections: Array<string>, appliedRules: Array<{ __typename?: 'AppliedRule', id: string, sourceUrl: string, tokensDelta?: number | null, method?: string | null, model?: string | null }> } } };
 
 export type EstimateQueryVariables = Exact<{
   text: Scalars['String']['input'];
@@ -195,8 +215,8 @@ export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 export type HealthQuery = { __typename?: 'Query', health: { __typename?: 'Health', status: string } };
 
 
-export const AnalyzeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Analyze"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AnalyzeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"analyze"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"prompt"}},{"kind":"Field","name":{"kind":"Name","value":"questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"text"}},{"kind":"Field","name":{"kind":"Name","value":"ruleId"}}]}}]}}]}}]} as unknown as DocumentNode<AnalyzeMutation, AnalyzeMutationVariables>;
+export const AnalyzeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Analyze"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AnalyzeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"analyze"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"prompt"}},{"kind":"Field","name":{"kind":"Name","value":"questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"text"}},{"kind":"Field","name":{"kind":"Name","value":"ruleId"}}]}},{"kind":"Field","name":{"kind":"Name","value":"findings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"severity"}},{"kind":"Field","name":{"kind":"Name","value":"sectionId"}},{"kind":"Field","name":{"kind":"Name","value":"sectionType"}},{"kind":"Field","name":{"kind":"Name","value":"ruleId"}},{"kind":"Field","name":{"kind":"Name","value":"summary"}},{"kind":"Field","name":{"kind":"Name","value":"source"}}]}}]}}]}}]} as unknown as DocumentNode<AnalyzeMutation, AnalyzeMutationVariables>;
 export const InvestigateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Investigate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"InvestigateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"investigate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"files"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"path"}},{"kind":"Field","name":{"kind":"Name","value":"sectionType"}},{"kind":"Field","name":{"kind":"Name","value":"contentPreview"}}]}},{"kind":"Field","name":{"kind":"Name","value":"suggestedCommands"}}]}}]}}]} as unknown as DocumentNode<InvestigateMutation, InvestigateMutationVariables>;
-export const OptimizeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Optimize"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OptimizeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optimize"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optimizedPrompt"}},{"kind":"Field","name":{"kind":"Name","value":"artifacts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cursorMdcSuggestions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"content"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"report"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inputTokens"}},{"kind":"Field","name":{"kind":"Name","value":"outputTokens"}},{"kind":"Field","name":{"kind":"Name","value":"reductionPercent"}},{"kind":"Field","name":{"kind":"Name","value":"targetProfile"}},{"kind":"Field","name":{"kind":"Name","value":"appliedRules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sourceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"tokensDelta"}}]}},{"kind":"Field","name":{"kind":"Name","value":"truncatedSections"}}]}}]}}]}}]} as unknown as DocumentNode<OptimizeMutation, OptimizeMutationVariables>;
+export const OptimizeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Optimize"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OptimizeInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optimize"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optimizedPrompt"}},{"kind":"Field","name":{"kind":"Name","value":"artifacts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cursorMdcSuggestions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"filename"}},{"kind":"Field","name":{"kind":"Name","value":"content"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"report"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"inputTokens"}},{"kind":"Field","name":{"kind":"Name","value":"outputTokens"}},{"kind":"Field","name":{"kind":"Name","value":"reductionPercent"}},{"kind":"Field","name":{"kind":"Name","value":"targetProfile"}},{"kind":"Field","name":{"kind":"Name","value":"appliedRules"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"sourceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"tokensDelta"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"model"}}]}},{"kind":"Field","name":{"kind":"Name","value":"truncatedSections"}}]}}]}}]}}]} as unknown as DocumentNode<OptimizeMutation, OptimizeMutationVariables>;
 export const EstimateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Estimate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"text"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenizer"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"estimate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"text"},"value":{"kind":"Variable","name":{"kind":"Name","value":"text"}}},{"kind":"Argument","name":{"kind":"Name","value":"tokenizer"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenizer"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokens"}}]}}]}}]} as unknown as DocumentNode<EstimateQuery, EstimateQueryVariables>;
 export const HealthDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Health"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"health"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<HealthQuery, HealthQueryVariables>;

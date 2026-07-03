@@ -87,7 +87,7 @@ https://jolly-glitter-2f2b.cloudflareaccess.com
 | Homepage URL | `https://jolly-glitter-2f2b.cloudflareaccess.com` |
 | Authorization callback URL | 上記 Callback URL |
 
-3. Client ID / Secret を Zero Trust → **Save** → **Finish setup**
+1. Client ID / Secret を Zero Trust → **Save** → **Finish setup**
 
 ### 1c. Test ボタンについて
 
@@ -145,7 +145,7 @@ IdP 横の **Test** リンクで `Unable to find the requested identity provider
 | 名前 | `translate-prompt-spa` |
 | セッション期間 | `24 hours` |
 
-4. **保存**
+1. **保存**
 
 ---
 

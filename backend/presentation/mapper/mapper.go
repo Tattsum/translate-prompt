@@ -85,7 +85,30 @@ func AnalyzeToGraphQL(r domainintake.AnalyzeResult) *model.AnalyzeResult {
 			RuleID: &ruleID,
 		})
 	}
+	for _, f := range r.Findings {
+		out.Findings = append(out.Findings, findingToGraphQL(f))
+	}
 	return out
+}
+
+func findingToGraphQL(f domainintake.Finding) *model.Finding {
+	ruleID := f.RuleID
+	sectionID := f.SectionRef.ID
+	sectionType := string(f.SectionRef.Type)
+	source := model.FindingSourceHeuristic
+	if f.Source == domainintake.FindingSourceLLM {
+		source = model.FindingSourceLlm
+	}
+	return &model.Finding{
+		ID:          f.ID,
+		Category:    f.Category,
+		Severity:    f.Severity,
+		SectionID:   &sectionID,
+		SectionType: &sectionType,
+		RuleID:      &ruleID,
+		Summary:     f.Summary,
+		Source:      source,
+	}
 }
 
 // InvestigateToGraphQL maps investigation result.
@@ -118,10 +141,14 @@ func OptimizeToGraphQL(r optimize.Result) *model.OptimizeResult {
 	}
 	for _, rule := range r.Report.AppliedRules {
 		delta := rule.TokensDelta
+		method := rule.Method
+		modelName := rule.Model
 		out.Report.AppliedRules = append(out.Report.AppliedRules, &model.AppliedRule{
 			ID:          rule.ID,
 			SourceURL:   rule.SourceURL,
 			TokensDelta: &delta,
+			Method:      &method,
+			Model:       &modelName,
 		})
 	}
 	for _, m := range r.Artifacts.CursorMDCSuggestions {
@@ -146,7 +173,23 @@ func AnalyzeToProto(r domainintake.AnalyzeResult) *translatepromptv1.AnalyzeResp
 			RuleId: q.RuleID,
 		})
 	}
+	for _, f := range r.Findings {
+		out.Findings = append(out.Findings, findingToProto(f))
+	}
 	return out
+}
+
+func findingToProto(f domainintake.Finding) *translatepromptv1.Finding {
+	return &translatepromptv1.Finding{
+		Id:          f.ID,
+		Category:    f.Category,
+		Severity:    int32(f.Severity),
+		SectionId:   f.SectionRef.ID,
+		SectionType: string(f.SectionRef.Type),
+		RuleId:      f.RuleID,
+		Summary:     f.Summary,
+		Source:      string(f.Source),
+	}
 }
 
 // InvestigateToProto maps investigation result.
@@ -182,6 +225,8 @@ func OptimizeToProto(r optimize.Result) *translatepromptv1.OptimizeResponse {
 			Id:          rule.ID,
 			SourceUrl:   rule.SourceURL,
 			TokensDelta: int32(rule.TokensDelta),
+			Method:      rule.Method,
+			Model:       rule.Model,
 		})
 	}
 	for _, m := range r.Artifacts.CursorMDCSuggestions {

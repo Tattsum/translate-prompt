@@ -71,6 +71,16 @@ export async function analyze(prompt: string, config: OptimizeConfig): Promise<A
       rule_id: q.ruleId ?? undefined,
     })),
     prompt: data.prompt ?? undefined,
+    findings: data.findings?.map((f) => ({
+      id: f.id,
+      category: f.category,
+      severity: f.severity,
+      section_id: f.sectionId ?? undefined,
+      section_type: f.sectionType ?? undefined,
+      rule_id: f.ruleId ?? undefined,
+      summary: f.summary,
+      source: f.source === 'LLM' ? 'llm' : 'heuristic',
+    })),
   }
 }
 

@@ -1,0 +1,30 @@
+# Markdown lint for repository documentation (README + docs/).
+# Prompt fixtures under backend/testdata are excluded (not docs).
+config:
+  default: true
+  MD013:
+    line_length: 120
+    code_blocks: false
+    tables: false
+  MD024:
+    siblings_only: true
+  # Intentional section numbering across doc index sections
+  MD029: false
+  # Blockquote task lists in deployment docs
+  MD032: false
+  # Bare URLs are common in reference tables
+  MD034: false
+  # ASCII diagrams without a language tag
+  MD040: false
+  # Compact GitHub-style tables
+  MD060: false
+
+globs:
+  - "README.md"
+  - "docs/**/*.md"
+
+ignores:
+  - "backend/**"
+  - "frontend/**"
+  - "workers/**"
+  - "node_modules/**"

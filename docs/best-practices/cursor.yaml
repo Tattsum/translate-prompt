@@ -106,3 +106,19 @@ rules:
     pipeline: compress
     stage: RemoveBoilerplate
     action: remove_agent_known_facts
+
+  - id: cursor-actionable-semantic
+    description: 曖昧規約を具体的制約に言い換え（残差）
+    source_url: https://cursor.com/docs/rules
+    source_section: "Avoid vague guidance"
+    automatable: false
+    pipeline: compress
+    stage: LLMRefiner
+    action: make_actionable_semantic
+    condition:
+      section_tag: rules
+    constraints:
+      must_not_increase_tokens: true
+    intake_on_failure: false
+    llm:
+      max_output_tokens: 1024

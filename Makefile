@@ -1,4 +1,4 @@
-.PHONY: help test lint lint-fix fmt fmt-check build build-cli build-server build-server-api web-build web-install serve dev clean install-tools deps gofix codegen
+.PHONY: help test lint lint-fix fmt fmt-check markdownlint markdownlint-fix markdownlint-install build build-cli build-server build-server-api web-build web-install serve dev clean install-tools deps gofix codegen
 
 BIN_DIR := bin
 GO := go
@@ -47,6 +47,15 @@ fmt-check: install-tools ## Verify Go formatting (fail if changes needed)
 lint: install-tools web-install ## Run golangci-lint and frontend eslint
 	@cd backend && $(GOLANGCI_LINT) run ./...
 	@cd frontend && $(PNPM) run lint
+
+markdownlint-install: ## Install root markdownlint dependencies
+	@$(PNPM) install --frozen-lockfile
+
+markdownlint: markdownlint-install ## Lint Markdown (README + docs/)
+	@$(PNPM) run markdownlint
+
+markdownlint-fix: markdownlint-install ## Auto-fix Markdown where supported
+	@$(PNPM) run markdownlint:fix
 
 test: web-install ## Run Go and frontend tests
 	$(GO) test $(BACKEND) -count=1
