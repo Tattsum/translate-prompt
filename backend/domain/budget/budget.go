@@ -75,7 +75,7 @@ func DefaultConfig() Config {
 		Tokenizer:         "cl100k_base",
 		LLMMaxCalls:       3,
 		LLMModelGemini:    "gemini-2.5-flash",
-		LLMModelAnthropic: "claude-sonnet-4-20250514",
+		LLMModelAnthropic: "claude-sonnet-5",
 	}
 }
 
