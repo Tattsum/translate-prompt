@@ -70,16 +70,16 @@ echo "--- 3. SPA Worker プロキシ (translate.tattsum.com) ---"
 spa_status=$(http_status "${SPA_URL}/")
 case "$spa_status" in
   200)
-    pass "SPA URL HTTP ${spa_status}"
+    warn "SPA URL HTTP ${spa_status} — Access 未設定の可能性（設定後は 302 が期待値）"
     ;;
   302|303)
-  warn "SPA URL HTTP ${spa_status} — Cloudflare Access リダイレクトの可能性（設定済みなら OK）"
-  ;;
+    pass "SPA URL HTTP ${spa_status} — Cloudflare Access リダイレクト（設定済み）"
+    ;;
   522|523)
-    warn "SPA URL HTTP ${spa_status} — DNS / Worker 未設定。docs/deployment-dns-setup.md を参照"
+    fail "SPA URL HTTP ${spa_status} — DNS / Worker 未設定。docs/deployment-dns-setup.md を参照"
     ;;
   *)
-    warn "SPA URL HTTP ${spa_status} — Access 未設定または DNS 未反映の可能性"
+    warn "SPA URL HTTP ${spa_status} — 要確認"
     ;;
 esac
 

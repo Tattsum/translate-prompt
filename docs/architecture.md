@@ -79,11 +79,45 @@ make dev     # Vite :5173（/query, Connect をプロキシ）
 
 ## 本番構成（Web 公開）
 
-招待制 β のデプロイ設計は [deployment.md](./deployment.md) を正とする。
+招待制 β のデプロイ設計は [deployment.md](./deployment.md) を正とする。  
+現状スナップショット: [deployment-session-handoff.md](./deployment-session-handoff.md)
 
 | 環境 | SPA | API | 認証 |
 |------|-----|-----|------|
 | ローカル | `make serve`（go:embed）または `make dev`（Vite） | `:8080` | なし |
-| 本番 β | Cloudflare Pages（`translate.tattsum.com`） | Workers → Tunnel → Fly.io（`prompt-api.tattsum.com`） | Cloudflare Access |
+| 本番 β | Workers → Pages（`translate.tattsum.com`） | Workers → Fly.io（`prompt-api.tattsum.com`） | Cloudflare Access（設定手順: [deployment-access-setup.md](./deployment-access-setup.md)） |
 
-本番では Investigate（サーバー FS 読み取り）は Web から無効。CLI のみ。
+### 本番トラフィックフロー
+
+```
+[ブラウザ]
+    │
+    ├─ https://translate.tattsum.com
+    │       ↓ Cloudflare Access（招待制）
+    │       ↓ Worker「translate-prompt-web」
+    │       ↓ リバースプロキシ
+    │       translate-prompt.pages.dev（Pages 静的 SPA）
+    │
+    └─ https://prompt-api.tattsum.com
+            ↓ Cloudflare Access（招待制）
+            ↓ Worker「translate-prompt-api-proxy」
+            ↓ リバースプロキシ（Access JWT はオリジンに転送しない）
+            https://translate-prompt-api.fly.dev（Go API）
+```
+
+### 本番の制約
+
+- **Investigate**（サーバー FS 読み取り）は Web から無効（`INVESTIGATE_ENABLED=false`）。CLI のみ
+- **Workspace Path** は本番ビルドで非表示（`VITE_ENABLE_WORKSPACE_PATH=false`）
+- **CORS** は `ALLOWED_ORIGINS=https://translate.tattsum.com` のみ許可
+- **GraphQL Playground** は `ENV=production` で無効（404）
+- **Tunnel** は未導入。Fly はパブリック URL 直結（個人 β）
+
+### 関連ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| [deployment.md](./deployment.md) | 合意サマリ・WP 定義 |
+| [deployment-dns-setup.md](./deployment-dns-setup.md) | DNS / Workers Route |
+| [deployment-access-setup.md](./deployment-access-setup.md) | Cloudflare Access 手動設定 |
+| [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) | 実装進捗 |
