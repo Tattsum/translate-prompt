@@ -9,6 +9,10 @@ buf = "latest"
 [env]
 GOPRIVATE = "github.com/Tattsum/*"
 
+[tasks.fmt-check]
+description = "Verify Go formatting (fail if changes needed)"
+run = "make fmt-check"
+
 [tasks.fmt]
 description = "Format Go code (go fix x2 + golangci-lint fmt)"
 run = "make fmt"

@@ -1,4 +1,4 @@
-.PHONY: help test lint lint-fix fmt build build-cli build-server build-server-api web-build web-install serve dev clean install-tools deps gofix codegen
+.PHONY: help test lint lint-fix fmt fmt-check build build-cli build-server build-server-api web-build web-install serve dev clean install-tools deps gofix codegen
 
 BIN_DIR := bin
 GO := go
@@ -36,18 +36,21 @@ fmt: gofix ## Format Go (go fix x2 + gofumpt)
 		exit 1; \
 	fi
 
-lint: ## Run golangci-lint and frontend eslint
-	@if command -v $(GOLANGCI_LINT) >/dev/null 2>&1; then \
-		cd backend && $(GOLANGCI_LINT) run ./...; \
-	else \
-		echo "golangci-lint not found. Run 'make install-tools'."; \
+fmt-check: install-tools ## Verify Go formatting (fail if changes needed)
+	@$(MAKE) fmt
+	@if [ -n "$$(git diff --name-only -- backend/)" ]; then \
+		echo "Format check failed. Run 'make fmt' locally."; \
+		git diff -- backend/; \
 		exit 1; \
 	fi
-	@cd frontend && $(PNPM) run lint 2>/dev/null || true
 
-test: ## Run Go and frontend tests
+lint: install-tools web-install ## Run golangci-lint and frontend eslint
+	@cd backend && $(GOLANGCI_LINT) run ./...
+	@cd frontend && $(PNPM) run lint
+
+test: web-install ## Run Go and frontend tests
 	$(GO) test $(BACKEND) -count=1
-	cd frontend && $(PNPM) test --run 2>/dev/null || true
+	cd frontend && $(PNPM) test --run
 
 build: build-cli build-server ## Build CLI and server
 
