@@ -129,7 +129,9 @@ fly secrets set \
 fly secrets set LLM_DEFAULT_MAX_CALLS=3 LLM_GEMINI_MODEL=gemini-2.5-flash
 ```
 
-設定後、アプリは再起動される。動作確認は [deployment-smoke-test スクリプト](../scripts/deployment-smoke-test.sh) に Analyze/Optimize を足すか、手動で GraphQL / UI から確認する。
+設定後、アプリは再起動される。動作確認は
+[deployment-smoke-test スクリプト](../scripts/deployment-smoke-test.sh) に Analyze/Optimize を足すか、
+手動で GraphQL / UI から確認する。
 
 ---
 

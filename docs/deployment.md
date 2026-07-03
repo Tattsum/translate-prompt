@@ -366,6 +366,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-1 に従い、Go サーバの本番対応を実装してください。
+>
 > - `LISTEN_HOST`, `ALLOWED_ORIGINS`, `INVESTIGATE_ENABLED` 環境変数
 > - `build-server-api` Makefile ターゲット（embed なし）
 > - `Dockerfile`, `fly.toml`
@@ -383,6 +384,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-2 に従い、SPA の API ベース URL 外部化と Settings UI 調整を実装してください。
+>
 > - `VITE_API_BASE_URL`, `VITE_ENABLE_WORKSPACE_PATH`
 > - `frontend/src/api/client.ts` 更新
 > - Vitest 更新
@@ -398,6 +400,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-3 に従い、Cloudflare Workers API プロキシを実装してください。
+>
 > - `wrangler.toml`, `workers/src/index.ts`
 > - `/query` と Connect-RPC パスの転送
 > - CORS は Go 側と整合させる
@@ -412,6 +415,7 @@ jobs:
 **プロンプト例**:
 
 > `docs/deployment.md` の WP-4 に従い、`.github/workflows/deploy.yml` を作成してください。
+>
 > - test → fly / workers / pages の順
 > - Secrets 名はドキュメント通り
 
@@ -425,6 +429,7 @@ jobs:
 **プロンプト例**:
 
 > WP-5 に従い、DNS / Access の手動セットアップとスモークテストを実施。
+>
 > - DNS: [deployment-dns-setup.md](./deployment-dns-setup.md)
 > - Access: [deployment-access-setup.md](./deployment-access-setup.md)
 > - `./scripts/deployment-smoke-test.sh`

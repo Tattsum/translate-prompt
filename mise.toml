@@ -21,6 +21,10 @@ run = "make fmt"
 description = "Run golangci-lint and frontend lint"
 run = "make lint"
 
+[tasks.markdownlint]
+description = "Lint Markdown documentation (README + docs/)"
+run = "make markdownlint"
+
 [tasks.test]
 description = "Run all tests"
 run = "make test"
