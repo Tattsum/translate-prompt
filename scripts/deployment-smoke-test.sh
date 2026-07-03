@@ -5,8 +5,11 @@
 #   ./scripts/deployment-smoke-test.sh
 #   SPA_URL=https://translate.tattsum.com API_URL=https://prompt-api.tattsum.com ./scripts/deployment-smoke-test.sh
 #
-# Access 設定前でも API / Pages の疎通確認は可能。
-# Access 設定後はブラウザでの手動確認（下記 MANUAL セクション）を実施すること。
+# bash で実行すること（sh だと色付き出力が崩れる場合あり）。
+#
+# Access 設定前: Workers API 経由で health JSON を期待。
+# Access 設定後: SPA / API は未認証 302。バックエンド疎通は Fly 直結で確認。
+# Access 設定後の GraphQL / CORS はブラウザ（ログイン後）で MANUAL 確認。
 
 set -euo pipefail
 
@@ -20,17 +23,21 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-pass() { echo -e "${GREEN}PASS${NC} $*"; }
-fail() { echo -e "${RED}FAIL${NC} $*"; exit 1; }
-warn() { echo -e "${YELLOW}WARN${NC} $*"; }
-info() { echo -e "     $*"; }
+pass() { printf "${GREEN}PASS${NC} %s\n" "$*"; }
+fail() { printf "${RED}FAIL${NC} %s\n" "$*"; exit 1; }
+warn() { printf "${YELLOW}WARN${NC} %s\n" "$*"; }
+info() { printf "     %s\n" "$*"; }
 
 http_status() {
   curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$1"
 }
 
-http_body() {
-  curl -sS --max-time 15 "$@"
+is_access_redirect() {
+  local status=$1
+  local body=$2
+  [[ "$status" == "302" || "$status" == "303" ]] && return 0
+  echo "$body" | grep -qi 'cloudflareaccess.com\|302 Found' && return 0
+  return 1
 }
 
 echo "=== translate-prompt deployment smoke test ==="
@@ -39,14 +46,21 @@ echo "API_URL=${API_URL}"
 echo "PAGES_URL=${PAGES_URL}"
 echo ""
 
-echo "--- 1. API Health (Workers 経由) ---"
-health=$(http_body -X POST "${API_URL}/query" \
+echo "--- 1. API (Workers 経由) ---"
+api_tmp=$(mktemp)
+api_status=$(curl -sS -o "$api_tmp" -w '%{http_code}' --max-time 15 -X POST "${API_URL}/query" \
   -H 'Content-Type: application/json' \
   -d '{"query":"{ health { status } }"}')
-if echo "$health" | grep -q '"status":"ok"'; then
-  pass "Workers API health: ${health}"
+api_body=$(cat "$api_tmp")
+rm -f "$api_tmp"
+
+if echo "$api_body" | grep -q '"status":"ok"'; then
+  pass "Workers API health: $(echo "$api_body" | tr -d '\n')"
+elif is_access_redirect "$api_status" "$api_body"; then
+  pass "Workers API HTTP ${api_status} — Cloudflare Access リダイレクト（設定済み）"
+  info "未認証 curl では JSON を取得できない。バックエンドは §4 Fly 直結で確認"
 else
-  fail "Workers API health unexpected: ${health}"
+  fail "Workers API unexpected (HTTP ${api_status}): ${api_body}"
 fi
 
 echo ""
@@ -84,25 +98,42 @@ case "$spa_status" in
 esac
 
 spa_settings_status=$(http_status "${SPA_URL}/settings")
-info "SPA /settings HTTP ${spa_settings_status}"
+case "$spa_settings_status" in
+  302|303)
+    info "SPA /settings HTTP ${spa_settings_status} (Access 保護下)"
+    ;;
+  *)
+    info "SPA /settings HTTP ${spa_settings_status}"
+    ;;
+esac
 
 echo ""
-echo "--- 4. Fly 直結 (参考) ---"
-fly_health=$(http_body -X POST "${FLY_URL}/query" \
+echo "--- 4. Fly 直結 (オリジン疎通) ---"
+fly_tmp=$(mktemp)
+fly_status=$(curl -sS -o "$fly_tmp" -w '%{http_code}' --max-time 15 -X POST "${FLY_URL}/query" \
   -H 'Content-Type: application/json' \
-  -d '{"query":"{ health { status } }"}' 2>/dev/null || echo '{"error":"unreachable"}')
-if echo "$fly_health" | grep -q '"status":"ok"'; then
-  pass "Fly direct health ok"
+  -d '{"query":"{ health { status } }"}' 2>/dev/null || echo "000")
+fly_body=$(cat "$fly_tmp" 2>/dev/null || true)
+rm -f "$fly_tmp"
+
+if echo "$fly_body" | grep -q '"status":"ok"'; then
+  pass "Fly direct health ok (HTTP ${fly_status})"
 else
-  warn "Fly direct: ${fly_health}"
+  warn "Fly direct HTTP ${fly_status}: ${fly_body:-unreachable}"
 fi
 
 echo ""
 echo "--- 5. CORS (許可オリジン) ---"
-cors_headers=$(curl -sS -D - -o /dev/null --max-time 15 -X OPTIONS "${API_URL}/query" \
+cors_hdr=$(mktemp)
+cors_status=$(curl -sS -D "$cors_hdr" -o /dev/null -w '%{http_code}' --max-time 15 -X OPTIONS "${API_URL}/query" \
   -H "Origin: https://evil.example" \
-  -H "Access-Control-Request-Method: POST" 2>/dev/null | tr -d '\r')
-if echo "$cors_headers" | grep -qi 'access-control-allow-origin: \*'; then
+  -H "Access-Control-Request-Method: POST" 2>/dev/null || echo "000")
+cors_headers=$(cat "$cors_hdr" 2>/dev/null || true)
+rm -f "$cors_hdr"
+
+if is_access_redirect "$cors_status" "$cors_headers"; then
+  info "API OPTIONS HTTP ${cors_status} — Access 保護下のため CORS はブラウザ（ログイン後）で確認"
+elif echo "$cors_headers" | grep -qi 'access-control-allow-origin: \*'; then
   warn "CORS allows * — ALLOWED_ORIGINS が未適用の可能性"
 elif echo "$cors_headers" | grep -qi "access-control-allow-origin: ${SPA_URL}"; then
   pass "CORS allows ${SPA_URL}"
@@ -116,11 +147,17 @@ fi
 echo ""
 echo "--- 6. GraphQL Playground (本番無効) ---"
 playground_status=$(http_status "${API_URL}/playground")
-if [[ "$playground_status" == "404" ]]; then
-  pass "Playground HTTP 404 (disabled in production)"
-else
-  warn "Playground HTTP ${playground_status} (expected 404)"
-fi
+case "$playground_status" in
+  404)
+    pass "Playground HTTP 404 (disabled in production)"
+    ;;
+  302|303)
+    info "Playground HTTP ${playground_status} — Access 保護下（ログイン後 404 か要確認）"
+    ;;
+  *)
+    warn "Playground HTTP ${playground_status} (expected 404 or Access 302)"
+    ;;
+esac
 
 echo ""
 echo "=== MANUAL: Access ログイン後にブラウザで確認 ==="
