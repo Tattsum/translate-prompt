@@ -1,7 +1,6 @@
 /bin/
 frontend/node_modules/
 workers/node_modules/
-workers/pnpm-workspace.yaml
 frontend/dist/assets/
 !frontend/dist/index.html
 *.pem
