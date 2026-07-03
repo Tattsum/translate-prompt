@@ -26,10 +26,15 @@ translate-prompt/
 | `domain/prompt` | `Prompt`, `Section`, `SectionType` |
 | `domain/budget` | `TokenBudget`, `OptimizeConfig` |
 | `domain/optimizer` | `Stage`, `Pipeline` |
-| `domain/intake` | `Ambiguity`, `Question` |
+| `domain/intake` | `Ambiguity`, `Question`（App-2: `Finding`, `AnalysisReport`） |
 | `domain/bestpractice` | `TargetProfile`, `Rule` |
+| `domain/llm` | **App-2** `Completer`, `CompletionIntent` / `Outcome` |
+| `domain/refine` | **App-2** `RefinementIntent` / `Outcome` |
+| `domain/ast` | **App-2** 軽量 AST ノード |
 | `application/optimize` | 最適化ユースケース |
 | `application/intake` | 深堀りオーケストレーション |
+| `infrastructure/llm` | **App-2** Gemini / Anthropic / PromptBuilder |
+| `infrastructure/ast` | **App-2** goldmark パース |
 | `graph` | gqlgen GraphQL リゾルバ |
 | `presentation/connectrpc` | Connect-RPC ハンドラ |
 | `presentation/cli` | CLI |
@@ -61,7 +66,18 @@ translate-prompt/
 [domain + infrastructure pipelines]
 ```
 
-FormatPipeline → CompressPipeline の順序は変更なし。
+FormatPipeline → CompressPipeline の順序は変更なし。  
+App-2 で Compress 内に AST / LLMRefiner Stage を追加。詳細: [phase2-app-roadmap.md](./phase2-app-roadmap.md)
+
+## App-2（LLM + AST）概要
+
+| 項目 | 内容 |
+|------|------|
+| 設計書 | [phase2-app-roadmap.md](./phase2-app-roadmap.md) |
+| LLM Provider | Gemini（デフォルト）+ Anthropic（`claude` Profile） |
+| Intake | ヒューリスティック常時 + LLM 補完 |
+| Refiner | `automatable: false`、Truncate 直前 |
+| Deploy-2 | スコープ外 |
 
 ## Web 配信
 
