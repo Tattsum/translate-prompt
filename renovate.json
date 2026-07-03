@@ -16,11 +16,23 @@
   "forkProcessing": "disabled",
   "rangeStrategy": "update-lockfile",
   "separateMinorPatch": true,
+  "internalChecksFilter": "strict",
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 10am on the first day of the month"]
   },
   "packageRules": [
+    {
+      "description": "pnpm default minimumReleaseAge (1 day) と揃え、公開24時間未満の npm パッケージでは PR を出さない",
+      "matchManagers": ["npm"],
+      "minimumReleaseAge": "1 day",
+      "minimumReleaseAgeBehaviour": "timestamp-required"
+    },
+    {
+      "description": "脆弱性修正は cooldown をスキップ（pnpm audit --fix の minimumReleaseAgeExclude と同趣旨）",
+      "matchCategories": ["security"],
+      "minimumReleaseAge": null
+    },
     {
       "matchManagers": ["npm"],
       "matchFileNames": ["frontend/package.json"],
