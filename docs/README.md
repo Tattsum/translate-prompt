@@ -11,14 +11,15 @@
 5. [api.md](./api.md) — REST API / CLI 仕様
 6. [implementation-roadmap.md](./implementation-roadmap.md) — Phase 1 実装チェックリスト
 7. [phase2-app-roadmap.md](./phase2-app-roadmap.md) — **App-2 設計（LLM + AST）合意・実装チェックリスト**
+8. [llm-setup.md](./llm-setup.md) — **LLM API キー取得・環境変数設定（ローカル / Fly）**
 
 ## Web 公開（デプロイ）
 
-8. [deployment-session-handoff.md](./deployment-session-handoff.md) — **現状スナップショット・次セッション引き継ぎ（最優先）**
-9. [deployment.md](./deployment.md) — Cloudflare 中心の本番構成・合意内容・実装仕様
-10. [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — デプロイ実装チェックリスト（進捗管理用）
-11. [deployment-dns-setup.md](./deployment-dns-setup.md) — DNS / Workers Route（SPA 手動設定）
-12. [deployment-access-setup.md](./deployment-access-setup.md) — Cloudflare Access 手動設定
+9. [deployment-session-handoff.md](./deployment-session-handoff.md) — **現状スナップショット・次セッション引き継ぎ（最優先）**
+10. [deployment.md](./deployment.md) — Cloudflare 中心の本番構成・合意内容・実装仕様
+11. [deployment-implementation-checklist.md](./deployment-implementation-checklist.md) — デプロイ実装チェックリスト（進捗管理用）
+12. [deployment-dns-setup.md](./deployment-dns-setup.md) — DNS / Workers Route（SPA 手動設定）
+13. [deployment-access-setup.md](./deployment-access-setup.md) — Cloudflare Access 手動設定
 
 ## プロジェクト概要
 

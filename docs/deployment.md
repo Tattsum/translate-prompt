@@ -154,6 +154,11 @@ docs/deployment-dns-setup.md        # DNS / Workers Route 手動設定
 | `ENV` | `dev` | `production` |
 | `INVESTIGATE_ENABLED` | `true`（省略可） | `false` |
 | `ALLOWED_ORIGINS` | `*`（省略可） | `https://translate.tattsum.com` |
+| `LLM_ENABLED` | `false`（省略可） | `true`（App-2 LLM 有効化時） |
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` | — | Gemini 利用時（[llm-setup.md](./llm-setup.md)） |
+| `ANTHROPIC_API_KEY` | — | `claude` Profile + LLM 時 |
+
+LLM のキー取得・ローカル設定の詳細は [llm-setup.md](./llm-setup.md) を参照。
 
 #### Dockerfile（方針）
 
@@ -441,6 +446,9 @@ jobs:
 fly auth login
 fly apps create translate-prompt-api
 fly secrets set INVESTIGATE_ENABLED=false ALLOWED_ORIGINS=https://translate.tattsum.com
+
+# App-2 LLM（任意）— キー取得手順: docs/llm-setup.md
+# fly secrets set LLM_ENABLED=true GOOGLE_API_KEY="..." ANTHROPIC_API_KEY="..."
 
 # デプロイ（CI 整備後は Actions から。secrets は deploy-fly で同期）
 fly deploy

@@ -523,10 +523,13 @@ infrastructure/llm/
 
 ### 8.3 環境変数
 
+キー取得・ローカル / Fly 設定の手順: **[llm-setup.md](./llm-setup.md)**
+
 | 変数 | 必須 | 説明 |
 |------|------|------|
 | `LLM_ENABLED` | — | `true` で LLM 有効。デフォルト `false` |
-| `GOOGLE_API_KEY` | Gemini 使用時 | `genai` が自動認識 |
+| `GOOGLE_API_KEY` | Gemini 使用時 | Gemini API キー（推奨名） |
+| `GEMINI_API_KEY` | Gemini 使用時 | 上記の別名（どちらか一方で可） |
 | `ANTHROPIC_API_KEY` | `claude` Profile + LLM 時 | Anthropic |
 | `LLM_DEFAULT_MAX_CALLS` | — | デフォルト `3` |
 | `LLM_GEMINI_MODEL` | — | 未設定時 `gemini-2.5-flash` |

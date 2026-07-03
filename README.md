@@ -39,6 +39,7 @@ cat prompt.md | ./bin/translate-prompt --max-tokens 8000 --target-profile codex
 | [docs/intake.md](./docs/intake.md) | 深堀りフロー |
 | [docs/api.md](./docs/api.md) | REST API / CLI |
 | [docs/implementation-roadmap.md](./docs/implementation-roadmap.md) | 実装チェックリスト |
+| [docs/llm-setup.md](./docs/llm-setup.md) | LLM API キー取得・環境変数設定 |
 | [docs/deployment.md](./docs/deployment.md) | Web 公開デプロイ設計（Cloudflare） |
 | [docs/deployment-access-setup.md](./docs/deployment-access-setup.md) | Cloudflare Access 設定手順 |
 

@@ -57,7 +57,8 @@ Analyze → Optimize（十分）→ 完了
 
 ## App-2: LLM 統合（合意）
 
-設計の正: [phase2-app-roadmap.md](./phase2-app-roadmap.md)
+設計の正: [phase2-app-roadmap.md](./phase2-app-roadmap.md)  
+API キー取得・環境変数: [llm-setup.md](./llm-setup.md)
 
 ### フロー
 
